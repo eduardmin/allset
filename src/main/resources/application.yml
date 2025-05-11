@@ -1,0 +1,27 @@
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/wedding_invitations
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 952418734372-nntcf8nrs3jiuiiqr4c7hjmu22trat53.apps.googleusercontent.com
+            client-secret: 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
+            scope: profile, email, openid
+            redirect-uri: http://localhost:8080/api/login/oauth2/code/google  # ✅ Redirect after login
+      resourceserver:
+        jwt:
+          issuer-uri: https://accounts.google.com  # ✅ Validate Google-issued tokens
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
