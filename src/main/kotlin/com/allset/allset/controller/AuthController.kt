@@ -24,6 +24,6 @@ class AuthController(private val userService: UserService) {
         }
 
         // Save or update user and return user data
-        return userService.saveUserFromJwt(jwt)
+        return userService.saveUser(jwt)
     }
 }

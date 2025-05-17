@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface InvitationRepository : MongoRepository<Invitation, String> {
     fun findAllByOwnerId(ownerId: String): List<Invitation>
+    fun findByUrlExtension(urlExtension: String): Invitation?
 }

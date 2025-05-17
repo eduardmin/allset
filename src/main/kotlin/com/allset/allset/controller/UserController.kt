@@ -1,5 +1,7 @@
 package com.allset.allset.controller
 
+import com.allset.allset.dto.UserDTO
+import com.allset.allset.dto.toDTO
 import com.allset.allset.model.Confirmation
 import com.allset.allset.model.Invitation
 import com.allset.allset.model.User
@@ -11,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 class UserController(private val userService: UserService) {
 
-    @GetMapping("/")
-    fun getCurrentUser(): User {
-        return userService.getCurrentUser()
+    @GetMapping
+    fun getCurrentUser(): UserDTO {
+        return userService.getCurrentUser().toDTO()
     }
 
     @GetMapping("/invitations")
@@ -29,9 +31,10 @@ class UserController(private val userService: UserService) {
         return userService.getConfirmationsByInvitationId(invitationId)
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping
     fun deleteCurrentUser() {
         userService.deleteCurrentUser()
     }
 }
+
 

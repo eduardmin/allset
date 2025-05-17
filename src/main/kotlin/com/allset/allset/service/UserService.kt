@@ -20,7 +20,7 @@ class UserService(
 
     private val logger = LoggerFactory.getLogger(UserService::class.java)
 
-    fun saveUserFromJwt(jwt: Jwt): User {
+    fun saveUser(jwt: Jwt): User {
         val email = jwt.getClaim<String>("email")
         val name = jwt.getClaim<String>("name")
         val picture = jwt.getClaim<String>("picture")
@@ -28,17 +28,15 @@ class UserService(
         logger.info("🔑 Extracted User Info: Email=$email, Name=$name, Picture=$picture")
 
         val existingUser = userRepository.findByEmail(email)
-        if (existingUser != null) {
+        return if (existingUser != null) {
             logger.info("✅ User already exists: ${existingUser.email}")
-            return existingUser
+            existingUser
+        } else {
+            val newUser = User(email = email, name = name, picture = picture)
+            userRepository.save(newUser)
         }
-        val userId = authenticationService.getCurrentUserId()
-        val newUser = User(id = userId, email = email, name = name, picture = picture)
-        userRepository.save(newUser)
-        logger.info("📝 New user saved: ${newUser.email}")
-
-        return newUser
     }
+
 
     fun getCurrentUser(): User {
         val userId = authenticationService.getCurrentUserId()

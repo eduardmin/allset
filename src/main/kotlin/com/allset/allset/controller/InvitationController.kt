@@ -5,16 +5,24 @@ import com.allset.allset.dto.toDTO
 import com.allset.allset.dto.toEntity
 import com.allset.allset.service.AuthenticationService
 import com.allset.allset.service.InvitationService
+import com.allset.allset.service.UserService
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/invitations")
-class InvitationController(private val invitationService: InvitationService, private val authenticationService: AuthenticationService
+class InvitationController(private val invitationService: InvitationService, private val authenticationService: AuthenticationService, private val userService: UserService
 ) {
 
     @PostMapping
     fun createInvitation(@RequestBody invitationDTO: InvitationDTO): InvitationDTO {
         val userId = authenticationService.getCurrentUserId()
+        val user = userService.getCurrentUser()
+
+        if (!user.isPaid) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You must complete payment to create an invitation.")
+        }
 
         val invitation = invitationDTO.toEntity(userId)
         return invitationService.createInvitation(invitation).toDTO()
@@ -40,5 +48,10 @@ class InvitationController(private val invitationService: InvitationService, pri
     @DeleteMapping("/{id}")
     fun deleteInvitation(@PathVariable id: String) {
         invitationService.deleteInvitation(id)
+    }
+
+    @GetMapping("/{url}")
+    fun getInvitationByUrlExtension(@PathVariable url: String): InvitationDTO? {
+        return invitationService.getInvitationByUrlExtension(url)?.toDTO()
     }
 }

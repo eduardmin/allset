@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service
 class InvitationService(
     private val invitationRepository: InvitationRepository,
     private val userRepository: UserRepository,
-    private val authenticationService: AuthenticationService
+    private val authenticationService: AuthenticationService,
+    private val templateService: TemplateService
 ) {
 
     fun createInvitation(invitation: Invitation): Invitation {
@@ -17,6 +18,11 @@ class InvitationService(
 
         userRepository.findById(userId).orElseThrow {
             IllegalArgumentException("User with ID $userId not found.")
+        }
+
+        val validTemplateIds = templateService.getTemplates().map { it.id }
+        if (invitation.templateId !in validTemplateIds) {
+            throw IllegalArgumentException("Invalid templateId: ${invitation.templateId}")
         }
 
         val invitationToSave = invitation.copy(
@@ -33,6 +39,10 @@ class InvitationService(
 
     fun getInvitationById(id: String): Invitation? {
         return invitationRepository.findById(id).orElse(null)
+    }
+
+    fun getInvitationByUrlExtension(urlExtension: String): Invitation? {
+        return invitationRepository.findByUrlExtension(urlExtension)
     }
 
     fun updateInvitation(id: String, updatedInvitation: Invitation): Invitation? {

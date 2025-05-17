@@ -6,21 +6,18 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "invitations")
 data class Invitation(
     @Id val id: String? = null,
+    val templateId: String,
     val ownerId: String,
     val title: String,
-    val urlExtension: String, // URL for invitation (unique if needed)
-    val eventDate: String, // "TBD" allowed if draft
+    val urlExtension: String,
+    val eventDate: String,
     val description: String,
-    val mainImages: List<String>, // multiple images
+    val mainImages: List<String>,
     val closingText: String,
-    val guestCountLimit: Int? = null,
     val confirmationEnabled: Boolean = true,
     val timeline: List<TimelineEvent>? = null,
-    val timelineHidden: Boolean = false,
-    val countdownEnabled: Boolean = true,
     val dressCode: DressCode? = null,
     val albumLink: String? = null,
-    val albumMessage: String? = null,
     val ourStory: OurStory? = null,
     val connectWithUs: ConnectWithUs? = null
 )
