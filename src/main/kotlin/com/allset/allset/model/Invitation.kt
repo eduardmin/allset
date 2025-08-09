@@ -8,24 +8,25 @@ data class Invitation(
     @Id val id: String? = null,
     val templateId: String,
     val ownerId: String,
-    val title: String,
+    val title: Map<String, String>,
     val urlExtension: String,
     val eventDate: String,
-    val description: String,
+    val description: Map<String, String>,
     val mainImages: List<String>,
-    val closingText: String,
+    val closingText: Map<String, String>,
     val confirmationEnabled: Boolean = true,
     val timeline: List<TimelineEvent>? = null,
     val dressCode: DressCode? = null,
     val albumLink: String? = null,
     val ourStory: OurStory? = null,
-    val connectWithUs: ConnectWithUs? = null
+    val connectWithUs: ConnectWithUs? = null,
+    val languages: List<String> = listOf("en")
 )
 
 data class TimelineEvent(
     val time: String,
-    val actionName: String,
-    val venueName: String,
+    val actionName: Map<String, String>,
+    val venueName: Map<String, String>,
     val venueLocation: String? = null
 )
 
@@ -48,6 +49,6 @@ data class DressCode(
 )
 
 data class OurStory(
-    val text: String,
+    val text: Map<String, String>,
     val photoUrls: List<String> // two photos
 )

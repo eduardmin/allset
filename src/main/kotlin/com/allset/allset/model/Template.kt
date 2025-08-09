@@ -6,10 +6,12 @@ import com.fasterxml.jackson.annotation.JsonValue
 data class Template(
     val id: String,
     val type: TemplateType,
-    val name: String,
+    val name: Map<String, String>,
+    val description: Map<String, String>,
     val templateImage: String,
-    val templateDescription: String,
-    val invitationModel: InvitationModel,
+    val mainImageMaxCount: Int,
+    val albumImageMaxCount: Int,
+    val palettes: List<ColorPalette>
 )
 
 data class InvitationModel(

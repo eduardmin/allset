@@ -5,24 +5,26 @@ import com.allset.allset.model.*
 data class InvitationDTO(
     val id: String? = null,
     val templateId: String,
-    val title: String,
+    val title: Map<String, String>,
     val urlExtension: String,
     val eventDate: String,
-    val description: String,
+    val description: Map<String, String>,
     val mainImages: List<String>,
-    val closingText: String,
+    val closingText: Map<String, String>,
     val confirmationEnabled: Boolean = true,
     val timeline: List<TimelineEventDTO>? = null,
     val dressCode: DressCodeDTO? = null,
     val albumLink: String? = null,
     val ourStory: OurStoryDTO? = null,
-    val connectWithUs: ConnectWithUsDTO? = null
+    val connectWithUs: ConnectWithUsDTO? = null,
+    val languages: List<String> = listOf("en")
 )
+
 
 data class TimelineEventDTO(
     val time: String,
-    val actionName: String,
-    val venueName: String,
+    val actionName: Map<String, String>,
+    val venueName: Map<String, String>,
     val venueLocation: String? = null
 )
 
@@ -45,7 +47,7 @@ data class DressCodeDTO(
 )
 
 data class OurStoryDTO(
-    val text: String,
+    val text: Map<String, String>,
     val photoUrls: List<String>
 )
 
@@ -65,7 +67,8 @@ fun InvitationDTO.toEntity(ownerId: String): Invitation {
         dressCode = this.dressCode?.toEntity(),
         albumLink = this.albumLink,
         ourStory = this.ourStory?.toEntity(),
-        connectWithUs = this.connectWithUs?.toEntity()
+        connectWithUs = this.connectWithUs?.toEntity(),
+        languages = this.languages
     )
 }
 
@@ -84,7 +87,8 @@ fun Invitation.toDTO(): InvitationDTO {
         dressCode = this.dressCode?.toDTO(),
         albumLink = this.albumLink,
         ourStory = this.ourStory?.toDTO(),
-        connectWithUs = this.connectWithUs?.toDTO()
+        connectWithUs = this.connectWithUs?.toDTO(),
+        languages = this.languages
     )
 }
 
