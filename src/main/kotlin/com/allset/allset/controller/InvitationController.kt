@@ -20,9 +20,9 @@ class InvitationController(private val invitationService: InvitationService, pri
         val userId = authenticationService.getCurrentUserId()
         val user = userService.getCurrentUser()
 
-        if (!user.isPaid) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You must complete payment to create an invitation.")
-        }
+//        if (!user.isPaid) {
+//            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You must complete payment to create an invitation.")
+//        }
 
         val invitation = invitationDTO.toEntity(userId)
         return invitationService.createInvitation(invitation).toDTO()

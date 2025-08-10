@@ -21,7 +21,7 @@ data class Invitation(
     val albumLink: String? = null,
     val ourStory: OurStory? = null,
     val languages: List<String> = listOf("en"),
-    val colorPalette: ColorPalette? = null,
+    val colorPaletteId: String? = null,
 )
 
 data class TimelineEvent(
@@ -39,7 +39,7 @@ data class ConnectWithUs(
 data class DressCode(
     val description: Map<String, String>,
     val style: String,
-    val colorPalette: ColorPalette
+    val colorPaletteId: String? = null
 )
 
 data class OurStory(
