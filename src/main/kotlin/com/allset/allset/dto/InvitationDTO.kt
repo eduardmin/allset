@@ -10,40 +10,34 @@ data class InvitationDTO(
     val eventDate: String,
     val description: Map<String, String>,
     val mainImages: List<String>,
-    val closingText: Map<String, String>,
-    val confirmationEnabled: Boolean = true,
+    val closingText: Map<String, String>? = null,
+    val confirmationEnabled: Boolean,
     val timeline: List<TimelineEventDTO>? = null,
+    val countDown: Boolean,
+    val connectWithUs: ConnectWithUsDTO? = null,
     val dressCode: DressCodeDTO? = null,
     val albumLink: String? = null,
     val ourStory: OurStoryDTO? = null,
-    val connectWithUs: ConnectWithUsDTO? = null,
-    val languages: List<String> = listOf("en")
+    val languages: List<String> = listOf("en"),
+    val colorPalette: ColorPalette? = null
 )
-
 
 data class TimelineEventDTO(
     val time: String,
-    val actionName: Map<String, String>,
     val venueName: Map<String, String>,
     val venueLocation: String? = null
 )
 
 data class ConnectWithUsDTO(
-    val groomName: String,
-    val groomLinks: List<LinkDTO>,
-    val brideName: String,
-    val brideLinks: List<LinkDTO>,
-    val fullImage: String
-)
-
-data class LinkDTO(
-    val link: String,
-    val icon: String
+    val name: String,
+    val phone: String,
+    val email: String
 )
 
 data class DressCodeDTO(
+    val description: Map<String, String>,
     val style: String,
-    val colorScheme: String
+    val colorPalette: ColorPalette
 )
 
 data class OurStoryDTO(
@@ -51,63 +45,53 @@ data class OurStoryDTO(
     val photoUrls: List<String>
 )
 
-fun InvitationDTO.toEntity(ownerId: String): Invitation {
-    return Invitation(
-        id = this.id,
-        templateId = this.templateId,
-        ownerId = ownerId,
-        title = this.title,
-        urlExtension = this.urlExtension,
-        eventDate = this.eventDate,
-        description = this.description,
-        mainImages = this.mainImages,
-        closingText = this.closingText,
-        confirmationEnabled = this.confirmationEnabled,
-        timeline = this.timeline?.map { it.toEntity() },
-        dressCode = this.dressCode?.toEntity(),
-        albumLink = this.albumLink,
-        ourStory = this.ourStory?.toEntity(),
-        connectWithUs = this.connectWithUs?.toEntity(),
-        languages = this.languages
-    )
-}
-
-fun Invitation.toDTO(): InvitationDTO {
-    return InvitationDTO(
-        id = this.id,
-        templateId = this.templateId,
-        title = this.title,
-        urlExtension = this.urlExtension,
-        eventDate = this.eventDate,
-        description = this.description,
-        mainImages = this.mainImages,
-        closingText = this.closingText,
-        confirmationEnabled = this.confirmationEnabled,
-        timeline = this.timeline?.map { it.toDTO() },
-        dressCode = this.dressCode?.toDTO(),
-        albumLink = this.albumLink,
-        ourStory = this.ourStory?.toDTO(),
-        connectWithUs = this.connectWithUs?.toDTO(),
-        languages = this.languages
-    )
-}
-
-fun TimelineEventDTO.toEntity() = TimelineEvent(time, actionName, venueName, venueLocation)
-fun TimelineEvent.toDTO() = TimelineEventDTO(time, actionName, venueName, venueLocation)
-
-fun ConnectWithUsDTO.toEntity() = ConnectWithUs(
-    groomName, groomLinks.map { it.toEntity() }, brideName, brideLinks.map { it.toEntity() }, fullImage
+fun InvitationDTO.toEntity(ownerId: String) = Invitation(
+    id = id,
+    templateId = templateId,
+    ownerId = ownerId,
+    title = title,
+    urlExtension = urlExtension,
+    eventDate = eventDate,
+    description = description,
+    mainImages = mainImages,
+    confirmationEnabled = confirmationEnabled,
+    timeline = timeline?.map { it.toEntity() },
+    countDown = countDown,
+    connectWithUs = connectWithUs?.toEntity(),
+    dressCode = dressCode?.toEntity(),
+    albumLink = albumLink,
+    ourStory = ourStory?.toEntity(),
+    languages = languages,
+    colorPalette = colorPalette
 )
 
-fun ConnectWithUs.toDTO() = ConnectWithUsDTO(
-    groomName, groomLinks.map { it.toDTO() }, brideName, brideLinks.map { it.toDTO() }, fullImage
+fun Invitation.toDTO() = InvitationDTO(
+    id = id,
+    templateId = templateId,
+    title = title,
+    urlExtension = urlExtension,
+    eventDate = eventDate,
+    description = description,
+    mainImages = mainImages,
+    confirmationEnabled = confirmationEnabled,
+    timeline = timeline?.map { it.toDTO() },
+    countDown = countDown,
+    connectWithUs = connectWithUs?.toDTO(),
+    dressCode = dressCode?.toDTO(),
+    albumLink = albumLink,
+    ourStory = ourStory?.toDTO(),
+    languages = languages,
+    colorPalette = colorPalette
 )
 
-fun LinkDTO.toEntity() = Link(link, icon)
-fun Link.toDTO() = LinkDTO(link, icon)
+fun TimelineEventDTO.toEntity() = TimelineEvent(time, venueName, venueLocation)
+fun TimelineEvent.toDTO() = TimelineEventDTO(time, venueName, venueLocation)
 
-fun DressCodeDTO.toEntity() = DressCode(style, colorScheme)
-fun DressCode.toDTO() = DressCodeDTO(style, colorScheme)
+fun ConnectWithUsDTO.toEntity() = ConnectWithUs(name, phone, email)
+fun ConnectWithUs.toDTO() = ConnectWithUsDTO(name, phone, email)
+
+fun DressCodeDTO.toEntity() = DressCode(description, style, colorPalette)
+fun DressCode.toDTO() = DressCodeDTO(description, style, colorPalette)
 
 fun OurStoryDTO.toEntity() = OurStory(text, photoUrls)
 fun OurStory.toDTO() = OurStoryDTO(text, photoUrls)

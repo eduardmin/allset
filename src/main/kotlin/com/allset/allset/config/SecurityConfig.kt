@@ -52,6 +52,8 @@ class SecurityConfig {
                     jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
                 }
             }
+            .csrf { csrf -> csrf.disable() }
+
             .logout { it.logoutSuccessUrl("/").permitAll() }
 
         http.addFilterBefore({ request, response, chain ->
@@ -66,27 +68,17 @@ class SecurityConfig {
 
     @Bean
     fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
-        val granted = JwtGrantedAuthoritiesConverter().apply { setAuthorityPrefix("ROLE_") }
-        return JwtAuthenticationConverter().apply { setJwtGrantedAuthoritiesConverter(granted) }
+        val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
+        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_")
+
+        val converter = JwtAuthenticationConverter()
+        converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter)
+        return converter
     }
 
     @Bean
     fun jwtDecoder(): JwtDecoder {
         logger.info("🔑 Configuring JWT Decoder with Google's public keys...")
         return NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs").build()
-    }
-
-    // Permissive CORS for local dev — adjust origins as needed
-    @Bean
-    fun corsConfigurationSource(): CorsConfigurationSource {
-        val cfg = CorsConfiguration().apply {
-            allowedOrigins = listOf("http://localhost:3000", "http://localhost:8080")
-            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-            allowedHeaders = listOf("*")
-            allowCredentials = true
-        }
-        return UrlBasedCorsConfigurationSource().apply {
-            registerCorsConfiguration("/**", cfg)
-        }
     }
 }
