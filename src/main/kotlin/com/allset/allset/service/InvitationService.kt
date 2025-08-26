@@ -1,5 +1,7 @@
 package com.allset.allset.service
 
+import com.allset.allset.dto.PartialInvitationDTO
+import com.allset.allset.dto.mergeWithPartialUpdate
 import com.allset.allset.model.Invitation
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.UserRepository
@@ -54,6 +56,20 @@ class InvitationService(
         } else {
             null
         }
+    }
+
+    fun patchInvitation(id: String, patch: PartialInvitationDTO): Invitation {
+        val userId = authenticationService.getCurrentUserId()
+        val existing = invitationRepository.findById(id).orElseThrow {
+            IllegalArgumentException("Invitation with id $id not found.")
+        }
+
+        if (existing.ownerId != userId) {
+            throw IllegalAccessException("Unauthorized to modify this invitation.")
+        }
+
+        val merged = existing.mergeWithPartialUpdate(patch)
+        return invitationRepository.save(merged)
     }
 
     fun deleteInvitation(id: String) {

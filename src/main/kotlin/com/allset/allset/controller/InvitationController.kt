@@ -1,6 +1,7 @@
 package com.allset.allset.controller
 
 import com.allset.allset.dto.InvitationDTO
+import com.allset.allset.dto.PartialInvitationDTO
 import com.allset.allset.dto.toDTO
 import com.allset.allset.dto.toEntity
 import com.allset.allset.service.AuthenticationService
@@ -45,12 +46,18 @@ class InvitationController(private val invitationService: InvitationService, pri
         return invitationService.updateInvitation(id, invitation)?.toDTO()
     }
 
+    @PatchMapping("/{id}")
+    fun patchInvitation(@PathVariable id: String, @RequestBody patch: PartialInvitationDTO): InvitationDTO {
+        return invitationService.patchInvitation(id, patch).toDTO()
+    }
+
+
     @DeleteMapping("/{id}")
     fun deleteInvitation(@PathVariable id: String) {
         invitationService.deleteInvitation(id)
     }
 
-    @GetMapping("/{url}")
+    @GetMapping("/url/{url}")
     fun getInvitationByUrlExtension(@PathVariable url: String): InvitationDTO? {
         return invitationService.getInvitationByUrlExtension(url)?.toDTO()
     }

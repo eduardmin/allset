@@ -35,7 +35,7 @@ app:
   localization:
     supported-languages:
       - en
-      - am
+      - hy
       - ru
 
 springdoc:
