@@ -11,5 +11,5 @@ data class User(
     val name: String,
     val picture: String?,
     val isPaid: Boolean = false,
-    val appliedPromoCode: AppliedPromoCode? = null
+    val appliedPromoCodes: List<AppliedPromoCode> = emptyList()
 )

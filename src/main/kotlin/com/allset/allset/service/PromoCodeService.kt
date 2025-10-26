@@ -25,10 +25,13 @@ class PromoCodeService(
         val user = userService.getCurrentUser()
 
         val appliedPromoCode = promoCode.toAppliedPromoCode()
-        val updatedUser = user.copy(appliedPromoCode = appliedPromoCode)
+        val updatedPromoCodes = user.appliedPromoCodes
+            .filterNot { it.code.equals(appliedPromoCode.code, ignoreCase = true) }
+            .plus(appliedPromoCode)
+        val updatedUser = user.copy(appliedPromoCodes = updatedPromoCodes)
         userRepository.save(updatedUser)
 
-        return pricingService.summarize(appliedPromoCode)
+        return pricingService.summarize(updatedPromoCodes)
     }
 
     fun previewPromoCode(code: String): PricingSummary {
@@ -38,11 +41,11 @@ class PromoCodeService(
 
     fun clearPromoCodeForCurrentUser(): PricingSummary {
         val user = userService.getCurrentUser()
-        if (user.appliedPromoCode == null) {
+        if (user.appliedPromoCodes.isEmpty()) {
             return pricingService.basePricing()
         }
 
-        val updatedUser = user.copy(appliedPromoCode = null)
+        val updatedUser = user.copy(appliedPromoCodes = emptyList())
         userRepository.save(updatedUser)
         return pricingService.basePricing()
     }
