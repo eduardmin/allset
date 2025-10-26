@@ -1,5 +1,6 @@
 package com.allset.allset.model
 
+import com.allset.allset.dto.PricingSummary
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 
@@ -11,7 +12,8 @@ data class Template(
     val templateImage: String,
     val mainImageMaxCount: Int,
     val albumImageMaxCount: Int,
-    val palettes: List<ColorPalette>
+    val palettes: List<ColorPalette>,
+    val pricing: PricingSummary
 )
 
 data class InvitationModel(
