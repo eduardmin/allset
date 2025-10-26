@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ConfirmationRepository : MongoRepository<Confirmation, String> {
-    fun findAllByInvitationId(invitationId: String): List<Confirmation>
+    fun findAllByInvitationIdAndDeletedFalse(invitationId: String): List<Confirmation>
 }
