@@ -10,6 +10,8 @@ data class User(
     val email: String,
     val name: String,
     val picture: String?,
+    val phoneNumber: String? = null,
+    val dateOfBirth: String? = null,
     val isPaid: Boolean = false,
     val appliedPromoCodes: List<AppliedPromoCode> = emptyList()
 )

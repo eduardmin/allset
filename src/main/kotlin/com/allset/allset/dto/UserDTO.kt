@@ -8,6 +8,8 @@ data class UserDTO(
     val email: String,
     val name: String,
     val picture: String?,
+    val phoneNumber: String?,
+    val dateOfBirth: String?,
     val appliedPromoCodes: List<AppliedPromoCode>
 )
 
@@ -16,10 +18,15 @@ fun User.toDTO(): UserDTO = UserDTO(
     email = this.email,
     name = this.name,
     picture = this.picture,
+    phoneNumber = this.phoneNumber,
+    dateOfBirth = this.dateOfBirth,
     appliedPromoCodes = this.appliedPromoCodes
 )
 
 fun UserDTO.toEntity(existing: User): User = existing.copy(
     name = this.name,
-    picture = this.picture
+    picture = this.picture,
+    phoneNumber = this.phoneNumber,
+    dateOfBirth = this.dateOfBirth,
+    appliedPromoCodes = this.appliedPromoCodes
 )
