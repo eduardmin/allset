@@ -1,7 +1,7 @@
 package com.allset.allset.service
 
+import com.allset.allset.dto.UpdateConfirmationRequest
 import com.allset.allset.model.Confirmation
-import com.allset.allset.model.ConfirmationStatus
 import com.allset.allset.repository.ConfirmationRepository
 import org.springframework.stereotype.Service
 
@@ -9,36 +9,68 @@ import org.springframework.stereotype.Service
 class ConfirmationService(private val confirmationRepository: ConfirmationRepository) {
 
     fun createConfirmation(confirmation: Confirmation): Confirmation {
-        validateConfirmation(confirmation)
-        return confirmationRepository.save(confirmation)
+        val sanitizedConfirmation = sanitizeGuests(confirmation)
+        validateConfirmation(sanitizedConfirmation)
+        return confirmationRepository.save(sanitizedConfirmation)
     }
 
     fun getConfirmationsByInvitationId(invitationId: String): List<Confirmation> {
-        return confirmationRepository.findAllByInvitationId(invitationId)
+        return confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId)
     }
 
     fun deleteConfirmation(id: String) {
-        confirmationRepository.deleteById(id)
+        val existingConfirmation = confirmationRepository.findById(id).orElseThrow {
+            IllegalArgumentException("Confirmation with id $id not found")
+        }
+
+        if (!existingConfirmation.deleted) {
+            confirmationRepository.save(existingConfirmation.copy(deleted = true))
+        }
+    }
+
+    fun updateConfirmation(id: String, updateRequest: UpdateConfirmationRequest): Confirmation {
+        val existingConfirmation = confirmationRepository.findById(id).orElseThrow {
+            IllegalArgumentException("Confirmation with id $id not found")
+        }
+
+        if (existingConfirmation.deleted) {
+            throw IllegalStateException("Cannot update a deleted confirmation with id $id")
+        }
+
+        val updatedConfirmation = existingConfirmation.copy(
+            mainGuest = updateRequest.mainGuest ?: existingConfirmation.mainGuest,
+            secondaryGuests = updateRequest.secondaryGuests ?: existingConfirmation.secondaryGuests,
+            status = updateRequest.status ?: existingConfirmation.status,
+            guestSide = updateRequest.guestSide ?: existingConfirmation.guestSide,
+            tableNumber = updateRequest.tableNumber ?: existingConfirmation.tableNumber,
+            notes = updateRequest.notes ?: existingConfirmation.notes
+        )
+
+        val sanitizedConfirmation = sanitizeGuests(updatedConfirmation)
+        validateConfirmation(sanitizedConfirmation)
+
+        return confirmationRepository.save(sanitizedConfirmation)
     }
 
     private fun validateConfirmation(confirmation: Confirmation) {
-        when (confirmation.status) {
-            ConfirmationStatus.CONFIRMED -> {
-                if (confirmation.guestNames.isEmpty() || confirmation.guestNames.size > 3) {
-                    throw IllegalArgumentException("If confirmed, you must provide 1 to 3 guest names.")
-                }
-                if (confirmation.guestCount != confirmation.guestNames.size) {
-                    throw IllegalArgumentException("Guest count must match number of guest names.")
-                }
-            }
-            ConfirmationStatus.DECLINED -> {
-                if (confirmation.guestNames.size != 1) {
-                    throw IllegalArgumentException("If declined, you must provide exactly 1 guest name.")
-                }
-                if (confirmation.guestCount != 1) {
-                    throw IllegalArgumentException("Guest count must be 1 if declined.")
-                }
-            }
+        if (confirmation.mainGuest.isBlank()) {
+            throw IllegalArgumentException("Main guest must be provided.")
         }
+
+        if (confirmation.tableNumber != null && confirmation.tableNumber <= 0) {
+            throw IllegalArgumentException("Table number must be greater than zero if provided.")
+        }
+    }
+
+    private fun sanitizeGuests(confirmation: Confirmation): Confirmation {
+        val trimmedMainGuest = confirmation.mainGuest.trim()
+        val cleanedSecondaryGuests = confirmation.secondaryGuests
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+
+        return confirmation.copy(
+            mainGuest = trimmedMainGuest,
+            secondaryGuests = cleanedSecondaryGuests
+        )
     }
 }

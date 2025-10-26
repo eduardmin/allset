@@ -67,7 +67,7 @@ class UserService(
             throw IllegalAccessException("🚨 You are not authorized to access confirmations for this invitation.")
         }
 
-        return confirmationRepository.findAllByInvitationId(invitationId)
+        return confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId)
     }
 
     fun updateUser(updateRequest: UpdateUserRequest): User {

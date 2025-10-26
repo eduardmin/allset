@@ -8,14 +8,28 @@ import java.time.Instant
 data class Confirmation(
     @Id val id: String? = null,
     val invitationId: String,
-    val guestNames: List<String>,
-    val guestCount: Int,
+    val mainGuest: String,
+    val secondaryGuests: List<String> = emptyList(),
     val status: ConfirmationStatus,
+    val guestSide: GuestSide,
+    val tableNumber: Int? = null,
     val notes: String? = null,
+    val createdBy: ConfirmationCreator,
+    val deleted: Boolean = false,
     val createdAt: Instant = Instant.now()
 )
 
 enum class ConfirmationStatus {
     CONFIRMED,
     DECLINED
+}
+
+enum class GuestSide {
+    GROOM,
+    BRIDE
+}
+
+enum class ConfirmationCreator {
+    INVITATION_OWNER,
+    GUEST
 }
