@@ -1,5 +1,6 @@
 package com.allset.allset.service
 
+import com.allset.allset.dto.UpdateUserRequest
 import com.allset.allset.model.Invitation
 import com.allset.allset.model.User
 import com.allset.allset.model.Confirmation
@@ -69,15 +70,17 @@ class UserService(
         return confirmationRepository.findAllByInvitationId(invitationId)
     }
 
-    fun updateUser(updatedUser: User): User {
+    fun updateUser(updateRequest: UpdateUserRequest): User {
         val userId = authenticationService.getCurrentUserId()
         val existingUser = userRepository.findById(userId).orElseThrow {
             RuntimeException("🚨 User not found.")
         }
 
         val userToUpdate = existingUser.copy(
-            name = updatedUser.name ?: existingUser.name,
-            picture = updatedUser.picture ?: existingUser.picture
+            name = updateRequest.name ?: existingUser.name,
+            picture = if (updateRequest.picture != null) updateRequest.picture else existingUser.picture,
+            phoneNumber = if (updateRequest.phoneNumber != null) updateRequest.phoneNumber else existingUser.phoneNumber,
+            dateOfBirth = if (updateRequest.dateOfBirth != null) updateRequest.dateOfBirth else existingUser.dateOfBirth
         )
 
         return userRepository.save(userToUpdate)
