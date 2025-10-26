@@ -22,8 +22,8 @@ class TemplateService(
     }
 
     fun getTemplates(): List<Template> {
-        val appliedPromoCode = userService.getCurrentUserOrNull()?.appliedPromoCode
-        val pricingSummary = pricingService.summarize(appliedPromoCode)
+        val appliedPromoCodes = userService.getCurrentUserOrNull()?.appliedPromoCodes ?: emptyList()
+        val pricingSummary = pricingService.summarize(appliedPromoCodes)
 
         return listOf(
             buildTemplate(
