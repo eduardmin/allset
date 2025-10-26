@@ -38,7 +38,7 @@ app:
       - hy
       - ru
   pricing:
-    base-price: 199.00
+    base-price: 20000.0
   promo-codes:
     codes:
       - code: WELCOME10
