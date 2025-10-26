@@ -1,6 +1,7 @@
 package com.allset.allset.service
 
 import com.allset.allset.config.LocalizationProperties
+import com.allset.allset.dto.PricingSummary
 import com.allset.allset.model.Template
 import com.allset.allset.model.TemplateType
 import org.springframework.context.MessageSource
@@ -8,9 +9,12 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class TemplateService(private val messageSource: MessageSource,
-                      private val localizationProperties: LocalizationProperties,
-                      private val colorPaletteService: ColorPaletteService
+class TemplateService(
+    private val messageSource: MessageSource,
+    private val localizationProperties: LocalizationProperties,
+    private val colorPaletteService: ColorPaletteService,
+    private val userService: UserService,
+    private val pricingService: PricingService
 ) {
 
     fun getSupportedLanguages(): List<String> {
@@ -18,6 +22,9 @@ class TemplateService(private val messageSource: MessageSource,
     }
 
     fun getTemplates(): List<Template> {
+        val appliedPromoCode = userService.getCurrentUserOrNull()?.appliedPromoCode
+        val pricingSummary = pricingService.summarize(appliedPromoCode)
+
         return listOf(
             buildTemplate(
                 id = "template.romantic",
@@ -25,7 +32,8 @@ class TemplateService(private val messageSource: MessageSource,
                 imageUrl = "http://localhost:8080/templates/romantic.png",
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
-                paletteIds = listOf("romantic_rose", "classic_elegance")
+                paletteIds = listOf("romantic_rose", "classic_elegance"),
+                pricingSummary = pricingSummary
             ),
             buildTemplate(
                 id = "template.armenian-chic",
@@ -33,7 +41,8 @@ class TemplateService(private val messageSource: MessageSource,
                 imageUrl = "http://localhost:8080/templates/armenian.png",
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
-                paletteIds = listOf("garden_party", "golden_sunset")
+                paletteIds = listOf("garden_party", "golden_sunset"),
+                pricingSummary = pricingSummary
             ),
             buildTemplate(
                 id = "template.elegant-classy",
@@ -41,7 +50,8 @@ class TemplateService(private val messageSource: MessageSource,
                 imageUrl = "http://localhost:8080/templates/classic.png",
                 mainImageMaxCount = 4,
                 albumImageMaxCount = 4,
-                paletteIds = listOf("classic_elegance", "ocean_breeze")
+                paletteIds = listOf("classic_elegance", "ocean_breeze"),
+                pricingSummary = pricingSummary
             )
         )
     }
@@ -52,7 +62,8 @@ class TemplateService(private val messageSource: MessageSource,
         imageUrl: String,
         mainImageMaxCount: Int,
         albumImageMaxCount: Int,
-        paletteIds: List<String>
+        paletteIds: List<String>,
+        pricingSummary: PricingSummary
     ): Template {
         return Template(
             id = id,
@@ -62,7 +73,8 @@ class TemplateService(private val messageSource: MessageSource,
             templateImage = imageUrl,
             mainImageMaxCount = mainImageMaxCount,
             albumImageMaxCount = albumImageMaxCount,
-            palettes = colorPaletteService.getByIds(paletteIds)
+            palettes = colorPaletteService.getByIds(paletteIds),
+            pricing = pricingSummary.copy()
         )
     }
 

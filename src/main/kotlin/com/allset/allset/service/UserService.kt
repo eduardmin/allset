@@ -45,6 +45,11 @@ class UserService(
         }
     }
 
+    fun getCurrentUserOrNull(): User? {
+        val userId = authenticationService.getCurrentUserIdOrNull() ?: return null
+        return userRepository.findById(userId).orElse(null)
+    }
+
     fun getInvitationsOfCurrentUser(): List<Invitation> {
         val userId = authenticationService.getCurrentUserId()
         return invitationRepository.findAllByOwnerId(userId)

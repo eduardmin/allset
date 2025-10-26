@@ -42,6 +42,7 @@ class SecurityConfig {
                     "/color-palettes/**",
                     "/health",
                     "/uploads/**",
+                    "/promo-codes/preview",
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
                     "/swagger-ui/**"

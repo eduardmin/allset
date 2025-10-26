@@ -10,15 +10,15 @@ class AuthenticationService(
     private val userRepository: UserRepository
 ) {
     fun getCurrentUserId(): String {
-        val email = getCurrentUserEmail()
-        val user = userRepository.findByEmail(email)
-            ?: throw RuntimeException("🚨 User with email $email not found.")
-        return user.id ?: throw RuntimeException("🚨 User ID is null for email $email")
+        return getCurrentUserIdOrNull()
+            ?: throw RuntimeException("🚨 User not authenticated.")
     }
 
-    private fun getCurrentUserEmail(): String {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val jwt = authentication.principal as Jwt
-        return jwt.getClaim("email")
+    fun getCurrentUserIdOrNull(): String? {
+        val authentication = SecurityContextHolder.getContext().authentication ?: return null
+        val jwt = authentication.principal as? Jwt ?: return null
+        val email = jwt.getClaim<String>("email") ?: return null
+        val user = userRepository.findByEmail(email) ?: return null
+        return user.id
     }
 }

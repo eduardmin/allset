@@ -37,6 +37,14 @@ app:
       - en
       - hy
       - ru
+  pricing:
+    base-price: 199.00
+  promo-codes:
+    codes:
+      - code: WELCOME10
+        discount-type: PERCENTAGE
+        discount-value: 10
+        active: true
 
 springdoc:
   api-docs:

@@ -10,5 +10,6 @@ data class User(
     val email: String,
     val name: String,
     val picture: String?,
-    val isPaid: Boolean = false
+    val isPaid: Boolean = false,
+    val appliedPromoCode: AppliedPromoCode? = null
 )
