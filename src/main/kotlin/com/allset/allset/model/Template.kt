@@ -13,7 +13,11 @@ data class Template(
     val mainImageMaxCount: Int,
     val albumImageMaxCount: Int,
     val palettes: List<ColorPalette>,
-    val pricing: PricingSummary
+    val pricing: PricingSummary,
+    val styleKeyword: Map<String, String>,
+    val lovedByKeyword: Map<String, String>,
+    val createdByKeyword: Map<String, String>,
+    val paletteKeyword: ColorPalette
 )
 
 data class InvitationModel(
@@ -31,9 +35,9 @@ data class InvitationModel(
 )
 
 enum class TemplateType {
-    ROMANTIC,
-    ARMENIAN_CHIC,
-    ELEGANT_CLASSY;
+    Classic_Elegance,
+    Modern_Romance,
+    Rustic_Love_Story;
 
     @JsonCreator
     fun fromString(key: String): TemplateType =

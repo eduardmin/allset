@@ -27,27 +27,27 @@ class TemplateService(
 
         return listOf(
             buildTemplate(
-                id = "template.romantic",
-                type = TemplateType.ROMANTIC,
-                imageUrl = "http://localhost:8080/templates/romantic.png",
+                id = "template.classic.elegance",
+                type = TemplateType.Classic_Elegance,
+                imageUrl = "/templates/classic_elegance.png",
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("romantic_rose", "classic_elegance"),
                 pricingSummary = pricingSummary
             ),
             buildTemplate(
-                id = "template.armenian-chic",
-                type = TemplateType.ARMENIAN_CHIC,
-                imageUrl = "http://localhost:8080/templates/armenian.png",
+                id = "template.modern.romance",
+                type = TemplateType.Modern_Romance,
+                imageUrl = "/templates/modern_romance.png",
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("garden_party", "golden_sunset"),
                 pricingSummary = pricingSummary
             ),
             buildTemplate(
-                id = "template.elegant-classy",
-                type = TemplateType.ELEGANT_CLASSY,
-                imageUrl = "http://localhost:8080/templates/classic.png",
+                id = "template.rustic.love.story",
+                type = TemplateType.Rustic_Love_Story,
+                imageUrl = "/templates/rustic_love_story.png",
                 mainImageMaxCount = 4,
                 albumImageMaxCount = 4,
                 paletteIds = listOf("classic_elegance", "ocean_breeze"),
@@ -74,8 +74,12 @@ class TemplateService(
             mainImageMaxCount = mainImageMaxCount,
             albumImageMaxCount = albumImageMaxCount,
             palettes = colorPaletteService.getByIds(paletteIds),
-            pricing = pricingSummary.copy()
-        )
+            pricing = pricingSummary.copy(),
+            styleKeyword = getLocalizedMessages("$id.keywords.style"),
+            lovedByKeyword = getLocalizedMessages("$id.keywords.lovedBy"),
+            createdByKeyword = getLocalizedMessages("$id.keywords.createdBy"),
+            paletteKeyword = colorPaletteService.getByIds(paletteIds).first()
+            )
     }
 
     private fun getLocalizedMessages(baseKey: String): Map<String, String> {
