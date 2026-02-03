@@ -9,10 +9,11 @@ class WebConfig : WebMvcConfigurer {
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
         // Serve uploaded files from file system
         registry.addResourceHandler("/uploads/**")
-            .addResourceLocations("file:uploads/")
+            .addResourceLocations("file:uploads/", "classpath:/uploads/")
         
         // Serve template images from classpath resources
         registry.addResourceHandler("/templates/**")
             .addResourceLocations("classpath:/static/templates/")
+            .setCachePeriod(3600)
     }
 }
