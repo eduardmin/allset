@@ -43,7 +43,6 @@ class SecurityConfig {
                     "/health",
                     "/uploads/**",
                     "/promo-codes/preview",
-                    "/confirmations/guest",
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
                     "/swagger-ui/**"
