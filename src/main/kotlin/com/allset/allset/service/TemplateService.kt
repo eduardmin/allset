@@ -29,7 +29,7 @@ class TemplateService(
             buildTemplate(
                 id = "template.classic.elegance",
                 type = TemplateType.Classic_Elegance,
-                imageUrl = "/templates/classic_elegance.png",
+                imageUrl = "/static/templates/classic_elegance.png",
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("romantic_rose", "classic_elegance"),
@@ -38,7 +38,7 @@ class TemplateService(
             buildTemplate(
                 id = "template.modern.romance",
                 type = TemplateType.Modern_Romance,
-                imageUrl = "/templates/modern_romance.png",
+                imageUrl = "/static/templates/modern_romance.png",
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("garden_party", "golden_sunset"),
@@ -47,7 +47,7 @@ class TemplateService(
             buildTemplate(
                 id = "template.rustic.love.story",
                 type = TemplateType.Rustic_Love_Story,
-                imageUrl = "/templates/rustic_love_story.png",
+                imageUrl = "/static/templates/rustic_love_story.png",
                 mainImageMaxCount = 4,
                 albumImageMaxCount = 4,
                 paletteIds = listOf("classic_elegance", "ocean_breeze"),

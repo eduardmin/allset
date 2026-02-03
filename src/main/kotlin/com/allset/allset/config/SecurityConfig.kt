@@ -38,6 +38,7 @@ class SecurityConfig {
                     "/error",
                     "/templates",
                     "/templates/**",
+                    "/static/**",
                     "/color-palettes",
                     "/color-palettes/**",
                     "/health",

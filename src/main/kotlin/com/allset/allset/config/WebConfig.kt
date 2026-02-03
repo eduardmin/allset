@@ -11,9 +11,9 @@ class WebConfig : WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**")
             .addResourceLocations("file:uploads/", "classpath:/uploads/")
         
-        // Serve template images from classpath resources
-        registry.addResourceHandler("/templates/**")
-            .addResourceLocations("classpath:/static/templates/")
+        // Serve static resources (including template images)
+        registry.addResourceHandler("/static/**")
+            .addResourceLocations("classpath:/static/")
             .setCachePeriod(3600)
     }
 }
