@@ -8,5 +8,3 @@ data class ConfirmationFilterDTO(
 data class ConfirmationFiltersResponse(
     val filters: List<ConfirmationFilterDTO>
 )
-
-

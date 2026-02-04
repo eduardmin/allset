@@ -3,6 +3,7 @@ package com.allset.allset.service
 import com.allset.allset.config.LocalizationProperties
 import com.allset.allset.dto.PricingSummary
 import com.allset.allset.model.Template
+import com.allset.allset.model.TemplateDefaults
 import com.allset.allset.model.TemplateType
 import org.springframework.context.MessageSource
 import org.springframework.stereotype.Service
@@ -14,7 +15,8 @@ class TemplateService(
     private val localizationProperties: LocalizationProperties,
     private val colorPaletteService: ColorPaletteService,
     private val userService: UserService,
-    private val pricingService: PricingService
+    private val pricingService: PricingService,
+    private val invitationDefaultsService: InvitationDefaultsService
 ) {
 
     fun getSupportedLanguages(): List<String> {
@@ -24,6 +26,7 @@ class TemplateService(
     fun getTemplates(): List<Template> {
         val appliedPromoCodes = userService.getCurrentUserOrNull()?.appliedPromoCodes ?: emptyList()
         val pricingSummary = pricingService.summarize(appliedPromoCodes)
+        val defaults = buildDefaults()
 
         return listOf(
             buildTemplate(
@@ -33,7 +36,8 @@ class TemplateService(
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("romantic_rose", "classic_elegance"),
-                pricingSummary = pricingSummary
+                pricingSummary = pricingSummary,
+                defaults = defaults
             ),
             buildTemplate(
                 id = "template.modern.romance",
@@ -42,7 +46,8 @@ class TemplateService(
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("garden_party", "golden_sunset"),
-                pricingSummary = pricingSummary
+                pricingSummary = pricingSummary,
+                defaults = defaults
             ),
             buildTemplate(
                 id = "template.rustic.love.story",
@@ -51,7 +56,8 @@ class TemplateService(
                 mainImageMaxCount = 4,
                 albumImageMaxCount = 4,
                 paletteIds = listOf("classic_elegance", "ocean_breeze"),
-                pricingSummary = pricingSummary
+                pricingSummary = pricingSummary,
+                defaults = defaults
             )
         )
     }
@@ -63,7 +69,8 @@ class TemplateService(
         mainImageMaxCount: Int,
         albumImageMaxCount: Int,
         paletteIds: List<String>,
-        pricingSummary: PricingSummary
+        pricingSummary: PricingSummary,
+        defaults: TemplateDefaults
     ): Template {
         return Template(
             id = id,
@@ -78,8 +85,18 @@ class TemplateService(
             styleKeyword = getLocalizedMessages("$id.keywords.style"),
             lovedByKeyword = getLocalizedMessages("$id.keywords.lovedBy"),
             createdByKeyword = getLocalizedMessages("$id.keywords.createdBy"),
-            paletteKeyword = colorPaletteService.getByIds(paletteIds).first()
-            )
+            paletteKeyword = colorPaletteService.getByIds(paletteIds).first(),
+            defaults = defaults
+        )
+    }
+
+    private fun buildDefaults(): TemplateDefaults {
+        return TemplateDefaults(
+            description = invitationDefaultsService.getDefaultDescription(),
+            agendaTitles = invitationDefaultsService.getDefaultAgendaTitles(),
+            dressCodeDescription = invitationDefaultsService.getDefaultDressCodeDescription(),
+            ourStoryText = invitationDefaultsService.getDefaultOurStoryText()
+        )
     }
 
     private fun getLocalizedMessages(baseKey: String): Map<String, String> {

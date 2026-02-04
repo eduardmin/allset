@@ -13,7 +13,10 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/invitations")
-class InvitationController(private val invitationService: InvitationService, private val authenticationService: AuthenticationService, private val userService: UserService
+class InvitationController(
+    private val invitationService: InvitationService, 
+    private val authenticationService: AuthenticationService, 
+    private val userService: UserService
 ) {
 
     @PostMapping

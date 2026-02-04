@@ -12,5 +12,3 @@ data class UserConfirmationRequest(
     val tableNumber: Int? = null,
     val notes: String? = null
 )
-
-

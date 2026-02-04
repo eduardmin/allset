@@ -17,7 +17,15 @@ data class Template(
     val styleKeyword: Map<String, String>,
     val lovedByKeyword: Map<String, String>,
     val createdByKeyword: Map<String, String>,
-    val paletteKeyword: ColorPalette
+    val paletteKeyword: ColorPalette,
+    val defaults: TemplateDefaults
+)
+
+data class TemplateDefaults(
+    val description: Map<String, String>,
+    val agendaTitles: Map<String, Map<String, String>>,
+    val dressCodeDescription: Map<String, String>,
+    val ourStoryText: Map<String, String>
 )
 
 data class InvitationModel(
