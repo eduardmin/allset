@@ -12,3 +12,4 @@ data class GuestConfirmationRequest(
     val notes: String? = null
 )
 
+

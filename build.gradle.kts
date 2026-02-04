@@ -50,3 +50,8 @@ kotlin {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+// Ensure resources are included in the JAR
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
