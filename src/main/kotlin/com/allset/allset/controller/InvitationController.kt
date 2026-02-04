@@ -19,6 +19,58 @@ class InvitationController(
     private val userService: UserService
 ) {
 
+    // Create new draft
+    @PostMapping("/draft")
+    fun createDraft(@RequestBody invitationDTO: InvitationDTO): InvitationDTO {
+        val userId = authenticationService.getCurrentUserId()
+        val invitation = invitationDTO.toEntity(userId)
+        return invitationService.saveDraft(invitation).toDTO()
+    }
+
+    // Update existing draft (full update)
+    @PutMapping("/draft/{id}")
+    fun updateDraft(@PathVariable id: String, @RequestBody invitationDTO: InvitationDTO): InvitationDTO {
+        val userId = authenticationService.getCurrentUserId()
+        val invitation = invitationDTO.toEntity(userId)
+        return invitationService.updateDraft(id, invitation).toDTO()
+    }
+
+    // Partial update draft (for auto-save)
+    @PatchMapping("/draft/{id}")
+    fun patchDraft(@PathVariable id: String, @RequestBody patch: PartialInvitationDTO): InvitationDTO {
+        return invitationService.patchDraft(id, patch).toDTO()
+    }
+
+    // Delete draft
+    @DeleteMapping("/draft/{id}")
+    fun deleteDraft(@PathVariable id: String) {
+        invitationService.deleteDraft(id)
+    }
+
+    // Get all drafts
+    @GetMapping("/drafts")
+    fun getDrafts(): List<InvitationDTO> {
+        return invitationService.getDrafts().map { it.toDTO() }
+    }
+
+    // Get active invitations
+    @GetMapping("/active")
+    fun getActiveInvitations(): List<InvitationDTO> {
+        return invitationService.getActiveInvitations().map { it.toDTO() }
+    }
+
+    // Get expired invitations
+    @GetMapping("/expired")
+    fun getExpiredInvitations(): List<InvitationDTO> {
+        return invitationService.getExpiredInvitations().map { it.toDTO() }
+    }
+
+    // Publish a draft
+    @PostMapping("/{id}/publish")
+    fun publishDraft(@PathVariable id: String): InvitationDTO {
+        return invitationService.publishDraft(id).toDTO()
+    }
+
     @PostMapping
     fun createInvitation(@RequestBody invitationDTO: InvitationDTO): InvitationDTO {
         val userId = authenticationService.getCurrentUserId()

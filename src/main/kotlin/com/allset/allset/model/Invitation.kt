@@ -2,6 +2,7 @@ package com.allset.allset.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.Instant
 
 @Document(collection = "invitations")
 data class Invitation(
@@ -10,9 +11,9 @@ data class Invitation(
     val ownerId: String,
     val title: Map<String, String>,
     val urlExtension: String,
-    val eventDate: String,
-    val description: Map<String, String>,
-    val mainImages: List<String>,
+    val eventDate: String? = null,
+    val description: Map<String, String>? = null,
+    val mainImages: List<String>? = null,
     val confirmationEnabled: Boolean,
     val timeline: List<TimelineEvent>? = null,
     val countDown: Boolean,
@@ -22,6 +23,10 @@ data class Invitation(
     val ourStory: OurStory? = null,
     val languages: List<String> = listOf("en"),
     val colorPaletteId: String? = null,
+    val status: InvitationStatus = InvitationStatus.DRAFT,
+    val createdAt: Instant = Instant.now(),
+    val publishedAt: Instant? = null,
+    val lastModifiedAt: Instant = Instant.now()
 )
 
 data class TimelineEvent(
@@ -46,3 +51,9 @@ data class OurStory(
     val text: Map<String, String>,
     val photoUrls: List<String>
 )
+
+enum class InvitationStatus {
+    DRAFT,
+    ACTIVE,
+    EXPIRED
+}

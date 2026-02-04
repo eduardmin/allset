@@ -1,25 +1,30 @@
 package com.allset.allset.dto
 
 import com.allset.allset.model.*
+import java.time.Instant
 
 data class InvitationDTO(
     val id: String? = null,
     val templateId: String,
     val title: Map<String, String>,
     val urlExtension: String,
-    val eventDate: String,
-    val description: Map<String, String>,
-    val mainImages: List<String>,
+    val eventDate: String? = null,
+    val description: Map<String, String>? = null,
+    val mainImages: List<String>? = null,
     val closingText: Map<String, String>? = null,
     val confirmationEnabled: Boolean,
     val timeline: List<TimelineEventDTO>? = null,
-    val countDown: Boolean,
+    val countDown: Boolean = false,
     val connectWithUs: ConnectWithUsDTO? = null,
     val dressCode: DressCodeDTO? = null,
     val albumLink: String? = null,
     val ourStory: OurStoryDTO? = null,
     val languages: List<String> = listOf("en"),
     val colorPaletteId: String? = null,
+    val status: InvitationStatus = InvitationStatus.DRAFT,
+    val createdAt: Instant? = null,
+    val publishedAt: Instant? = null,
+    val lastModifiedAt: Instant? = null
 )
 
 data class TimelineEventDTO(
@@ -81,7 +86,11 @@ fun Invitation.toDTO() = InvitationDTO(
     albumLink = albumLink,
     ourStory = ourStory?.toDTO(),
     languages = languages,
-    colorPaletteId = colorPaletteId
+    colorPaletteId = colorPaletteId,
+    status = status,
+    createdAt = createdAt,
+    publishedAt = publishedAt,
+    lastModifiedAt = lastModifiedAt
 )
 
 fun TimelineEventDTO.toEntity() = TimelineEvent(time, venueName, venueLocation)
