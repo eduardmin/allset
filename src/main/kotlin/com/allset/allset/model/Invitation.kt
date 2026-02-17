@@ -2,6 +2,7 @@ package com.allset.allset.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.math.BigDecimal
 import java.time.Instant
 
 @Document(collection = "invitations")
@@ -26,6 +27,8 @@ data class Invitation(
     val status: InvitationStatus = InvitationStatus.DRAFT,
     val createdAt: Instant = Instant.now(),
     val publishedAt: Instant? = null,
+    val expiresAt: Instant? = null,
+    val finalPrice: BigDecimal? = null,
     val lastModifiedAt: Instant = Instant.now()
 )
 

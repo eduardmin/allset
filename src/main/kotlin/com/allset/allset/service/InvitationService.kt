@@ -4,10 +4,12 @@ import com.allset.allset.dto.PartialInvitationDTO
 import com.allset.allset.dto.mergeWithPartialUpdate
 import com.allset.allset.model.Invitation
 import com.allset.allset.model.InvitationStatus
+import com.allset.allset.repository.ConfirmationRepository
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.UserRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Service
 class InvitationService(
@@ -15,7 +17,9 @@ class InvitationService(
     private val userRepository: UserRepository,
     private val authenticationService: AuthenticationService,
     private val templateService: TemplateService,
-    private val invitationDefaultsService: InvitationDefaultsService
+    private val invitationDefaultsService: InvitationDefaultsService,
+    private val pricingService: PricingService,
+    private val confirmationRepository: ConfirmationRepository
 ) {
 
     // Create new draft
@@ -123,6 +127,11 @@ class InvitationService(
         val userId = authenticationService.getCurrentUserId()
         return invitationRepository.findAllByOwnerIdAndStatus(userId, InvitationStatus.ACTIVE)
     }
+    
+    // Get guest count for an invitation
+    fun getGuestCount(invitationId: String): Int {
+        return confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId).size
+    }
 
     // Get expired invitations
     fun getExpiredInvitations(): List<Invitation> {
@@ -153,9 +162,23 @@ class InvitationService(
             throw IllegalArgumentException("Invalid templateId: ${draft.templateId}")
         }
 
+        // Get user to calculate final price
+        val user = userRepository.findById(userId).orElseThrow {
+            IllegalArgumentException("User with ID $userId not found.")
+        }
+
+        // Calculate final price using pricing service
+        val pricingSummary = pricingService.summarize(user.appliedPromoCodes)
+        val finalPrice = pricingSummary.finalPrice
+
+        val publishedAt = Instant.now()
+        val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS) // 1 year after publish
+
         val publishedInvitation = draft.copy(
             status = InvitationStatus.ACTIVE,
-            publishedAt = Instant.now(),
+            publishedAt = publishedAt,
+            expiresAt = expiresAt,
+            finalPrice = finalPrice,
             lastModifiedAt = Instant.now()
         )
 
@@ -180,7 +203,7 @@ class InvitationService(
     fun createInvitation(invitation: Invitation): Invitation {
         val userId = authenticationService.getCurrentUserId()
 
-        userRepository.findById(userId).orElseThrow {
+        val user = userRepository.findById(userId).orElseThrow {
             IllegalArgumentException("User with ID $userId not found.")
         }
 
@@ -192,11 +215,20 @@ class InvitationService(
         // Apply defaults for missing fields
         val invitationWithDefaults = applyDefaults(invitation)
 
+        // Calculate final price using pricing service
+        val pricingSummary = pricingService.summarize(user.appliedPromoCodes)
+        val finalPrice = pricingSummary.finalPrice
+
+        val publishedAt = Instant.now()
+        val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS) // 1 year after publish
+
         val invitationToSave = invitationWithDefaults.copy(
             id = null,
             ownerId = userId,
             status = InvitationStatus.ACTIVE,
-            publishedAt = Instant.now()
+            publishedAt = publishedAt,
+            expiresAt = expiresAt,
+            finalPrice = finalPrice
         )
         return invitationRepository.save(invitationToSave)
     }

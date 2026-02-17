@@ -5,6 +5,7 @@ import com.allset.allset.dto.PartialInvitationDTO
 import com.allset.allset.dto.toDTO
 import com.allset.allset.dto.toEntity
 import com.allset.allset.service.AuthenticationService
+import com.allset.allset.service.ConfirmationService
 import com.allset.allset.service.InvitationService
 import com.allset.allset.service.UserService
 import org.springframework.http.HttpStatus
@@ -16,7 +17,8 @@ import org.springframework.web.server.ResponseStatusException
 class InvitationController(
     private val invitationService: InvitationService, 
     private val authenticationService: AuthenticationService, 
-    private val userService: UserService
+    private val userService: UserService,
+    private val confirmationService: ConfirmationService
 ) {
 
     // Create new draft
@@ -56,7 +58,10 @@ class InvitationController(
     // Get active invitations
     @GetMapping("/active")
     fun getActiveInvitations(): List<InvitationDTO> {
-        return invitationService.getActiveInvitations().map { it.toDTO() }
+        return invitationService.getActiveInvitations().map { invitation ->
+            val guestCount = invitation.id?.let { invitationService.getGuestCount(it) }
+            invitation.toDTO(guestCount = guestCount)
+        }
     }
 
     // Get expired invitations
