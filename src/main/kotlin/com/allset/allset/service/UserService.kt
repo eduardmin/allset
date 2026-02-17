@@ -23,10 +23,15 @@ class UserService(
 
     fun saveUser(jwt: Jwt): User {
         val email = jwt.getClaim<String>("email")
-        val name = jwt.getClaim<String>("name")
+        val name = jwt.getClaim<String>("name") ?: jwt.getClaim<String>("nickname") ?: "User"
         val picture = jwt.getClaim<String>("picture")
+        val sub = jwt.getClaim<String>("sub")
 
-        logger.info("🔑 Extracted User Info: Email=$email, Name=$name, Picture=$picture")
+        logger.info("🔑 Extracted User Info from Auth0: Email=$email, Name=$name, Picture=$picture, Sub=$sub")
+
+        if (email == null) {
+            throw RuntimeException("Email claim not found in JWT token")
+        }
 
         val existingUser = userRepository.findByEmail(email)
         return if (existingUser != null) {
@@ -34,7 +39,9 @@ class UserService(
             existingUser
         } else {
             val newUser = User(email = email, name = name, picture = picture)
-            userRepository.save(newUser)
+            val savedUser = userRepository.save(newUser)
+            logger.info("✅ Created new user: ${savedUser.email}")
+            savedUser
         }
     }
 

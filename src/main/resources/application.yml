@@ -15,16 +15,10 @@ spring:
 
   security:
     oauth2:
-      client:
-        registration:
-          google:
-            client-id: 952418734372-nntcf8nrs3jiuiiqr4c7hjmu22trat53.apps.googleusercontent.com
-            client-secret: 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
-            scope: profile, email, openid
-            redirect-uri: http://localhost:8080/api/login/oauth2/code/google
       resourceserver:
         jwt:
-          issuer-uri: https://accounts.google.com
+          issuer-uri: https://dev-ihzu1eqm6kr7z6rb.us.auth0.com/
+          audience: https://allsetoAuth.com
 
 logging:
   level:
