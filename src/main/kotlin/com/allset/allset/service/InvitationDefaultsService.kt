@@ -1,9 +1,12 @@
 package com.allset.allset.service
 
 import com.allset.allset.config.LocalizationProperties
+import jakarta.validation.constraints.Max
 import org.springframework.context.MessageSource
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
 @Service
 class InvitationDefaultsService(

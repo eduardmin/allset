@@ -16,7 +16,8 @@ class TemplateService(
     private val colorPaletteService: ColorPaletteService,
     private val userService: UserService,
     private val pricingService: PricingService,
-    private val invitationDefaultsService: InvitationDefaultsService
+    private val invitationDefaultsService: InvitationDefaultsService,
+    private val s3Service: S3Service
 ) {
 
     fun getSupportedLanguages(): List<String> {
@@ -32,7 +33,8 @@ class TemplateService(
             buildTemplate(
                 id = "template.classic.elegance",
                 type = TemplateType.Classic_Elegance,
-                imageUrl = "/static/templates/classic_elegance.png",
+                imageUrl = s3Service.getTemplateUrl("classic_elegance.png"),
+                mobileImageUrl = s3Service.getTemplateUrl("classic_elegance_mobile.png"),
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("romantic_rose", "classic_elegance"),
@@ -42,7 +44,8 @@ class TemplateService(
             buildTemplate(
                 id = "template.modern.romance",
                 type = TemplateType.Modern_Romance,
-                imageUrl = "/static/templates/modern_romance.png",
+                imageUrl = s3Service.getTemplateUrl("modern_romance.png"),
+                mobileImageUrl = s3Service.getTemplateUrl("modern_romance_mobile.png"),
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("garden_party", "golden_sunset"),
@@ -52,7 +55,8 @@ class TemplateService(
             buildTemplate(
                 id = "template.rustic.love.story",
                 type = TemplateType.Rustic_Love_Story,
-                imageUrl = "/static/templates/rustic_love_story.png",
+                imageUrl = s3Service.getTemplateUrl("rustic_love_story.png"),
+                mobileImageUrl = s3Service.getTemplateUrl("rustic_love_story_mobile.png"),
                 mainImageMaxCount = 4,
                 albumImageMaxCount = 4,
                 paletteIds = listOf("classic_elegance", "ocean_breeze"),
@@ -66,6 +70,7 @@ class TemplateService(
         id: String,
         type: TemplateType,
         imageUrl: String,
+        mobileImageUrl: String,
         mainImageMaxCount: Int,
         albumImageMaxCount: Int,
         paletteIds: List<String>,
@@ -78,6 +83,7 @@ class TemplateService(
             name = getLocalizedMessages("$id.name"),
             description = getLocalizedMessages("$id.description"),
             templateImage = imageUrl,
+            templateImageMobile = mobileImageUrl,
             mainImageMaxCount = mainImageMaxCount,
             albumImageMaxCount = albumImageMaxCount,
             palettes = colorPaletteService.getByIds(paletteIds),

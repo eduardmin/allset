@@ -10,6 +10,7 @@ data class Template(
     val name: Map<String, String>,
     val description: Map<String, String>,
     val templateImage: String,
+    val templateImageMobile: String,
     val mainImageMaxCount: Int,
     val albumImageMaxCount: Int,
     val palettes: List<ColorPalette>,

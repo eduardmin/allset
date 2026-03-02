@@ -40,6 +40,13 @@ app:
         discount-value: 10
         active: true
 
+aws:
+  s3:
+    bucket: ${AWS_S3_BUCKET:allset-images}
+    region: ${AWS_REGION:eu-west-3}
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
