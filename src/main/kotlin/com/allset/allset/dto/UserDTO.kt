@@ -10,6 +10,7 @@ data class UserDTO(
     val picture: String?,
     val phoneNumber: String?,
     val dateOfBirth: String?,
+    val status: String?,
     val appliedPromoCodes: List<AppliedPromoCode>
 )
 
@@ -20,6 +21,7 @@ fun User.toDTO(): UserDTO = UserDTO(
     picture = this.picture,
     phoneNumber = this.phoneNumber,
     dateOfBirth = this.dateOfBirth,
+    status = this.status,
     appliedPromoCodes = this.appliedPromoCodes
 )
 
@@ -28,5 +30,6 @@ fun UserDTO.toEntity(existing: User): User = existing.copy(
     picture = this.picture,
     phoneNumber = this.phoneNumber,
     dateOfBirth = this.dateOfBirth,
+    status = this.status,
     appliedPromoCodes = this.appliedPromoCodes
 )

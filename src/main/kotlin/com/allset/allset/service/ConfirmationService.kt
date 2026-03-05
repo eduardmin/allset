@@ -121,6 +121,12 @@ class ConfirmationService(
         return confirmationRepository.save(sanitizedConfirmation)
     }
 
+    fun getConfirmation(id: String): Confirmation {
+        return confirmationRepository.findById(id).orElseThrow {
+            IllegalArgumentException("Confirmation with id $id not found")
+        }
+    }
+
     fun getConfirmationsByInvitationId(invitationId: String): List<Confirmation> {
         return confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId)
     }

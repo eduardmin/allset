@@ -14,7 +14,7 @@ class HomeService(
 ) {
 
     companion object {
-        private const val FAQ_COUNT = 6
+        private const val FAQ_COUNT = 5
         private const val FEEDBACK_COUNT = 3
     }
 

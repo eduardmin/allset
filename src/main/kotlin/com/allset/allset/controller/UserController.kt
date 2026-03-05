@@ -18,8 +18,8 @@ class UserController(private val userService: UserService) {
     }
 
     @PatchMapping
-    fun updateCurrentUser(@RequestBody updateUserRequest: UpdateUserRequest): UserDTO {
-        return userService.updateUser(updateUserRequest).toDTO()
+    fun updateCurrentUser(@RequestBody updateUserRequest: UpdateUserRequest): Map<String, Any?> {
+        return userService.updateUser(updateUserRequest)
     }
 
     @GetMapping("/invitations")

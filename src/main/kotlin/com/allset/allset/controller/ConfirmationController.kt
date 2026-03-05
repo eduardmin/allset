@@ -47,6 +47,11 @@ class ConfirmationController(
         return confirmationService.getConfirmationsByInvitationIdWithFilter(invitationId, filterId)
     }
 
+    @GetMapping("/{id}")
+    fun getConfirmation(@PathVariable id: String): Confirmation {
+        return confirmationService.getConfirmation(id)
+    }
+
     @PatchMapping("/{id}")
     fun updateConfirmation(
         @PathVariable id: String,

@@ -13,5 +13,6 @@ data class User(
     val phoneNumber: String? = null,
     val dateOfBirth: String? = null,
     val isPaid: Boolean = false,
-    val appliedPromoCodes: List<AppliedPromoCode> = emptyList()
+    val appliedPromoCodes: List<AppliedPromoCode> = emptyList(),
+    val status: String? = null
 )

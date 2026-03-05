@@ -77,20 +77,24 @@ class UserService(
         return confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId)
     }
 
-    fun updateUser(updateRequest: UpdateUserRequest): User {
+    fun updateUser(updateRequest: UpdateUserRequest): Map<String, Any?> {
         val userId = authenticationService.getCurrentUserId()
         val existingUser = userRepository.findById(userId).orElseThrow {
             RuntimeException("🚨 User not found.")
         }
 
+        val updatedFields = mutableMapOf<String, Any?>()
+
         val userToUpdate = existingUser.copy(
-            name = updateRequest.name ?: existingUser.name,
-            picture = if (updateRequest.picture != null) updateRequest.picture else existingUser.picture,
-            phoneNumber = if (updateRequest.phoneNumber != null) updateRequest.phoneNumber else existingUser.phoneNumber,
-            dateOfBirth = if (updateRequest.dateOfBirth != null) updateRequest.dateOfBirth else existingUser.dateOfBirth
+            name = updateRequest.name?.also { updatedFields["name"] = it } ?: existingUser.name,
+            picture = updateRequest.picture?.also { updatedFields["picture"] = it } ?: existingUser.picture,
+            phoneNumber = updateRequest.phoneNumber?.also { updatedFields["phoneNumber"] = it } ?: existingUser.phoneNumber,
+            dateOfBirth = updateRequest.dateOfBirth?.also { updatedFields["dateOfBirth"] = it } ?: existingUser.dateOfBirth,
+            status = updateRequest.status?.also { updatedFields["status"] = it } ?: existingUser.status
         )
 
-        return userRepository.save(userToUpdate)
+        userRepository.save(userToUpdate)
+        return updatedFields
     }
 
     fun deleteCurrentUser() {
