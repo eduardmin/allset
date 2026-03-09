@@ -127,6 +127,40 @@ class ConfirmationService(
         }
     }
 
+    fun getConfirmationStats(invitationId: String): ConfirmationStatsResponse {
+        val confirmations = confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId)
+
+        val confirmed = confirmations.count { it.status == ConfirmationStatus.CONFIRMED }
+        val pending = confirmations.count { it.status == ConfirmationStatus.PENDING }
+        val notComing = confirmations.count { it.status == ConfirmationStatus.DECLINED }
+        val totalGuests = confirmations.sumOf { 1 + it.secondaryGuests.size }
+
+        return ConfirmationStatsResponse(
+            confirmed = confirmed,
+            pending = pending,
+            notComing = notComing,
+            totalGuests = totalGuests
+        )
+    }
+
+    fun getTableList(invitationId: String): TableListResponse {
+        val confirmations = confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId)
+
+        val withTable = confirmations.filter { it.tableNumber != null }
+        val withoutTable = confirmations.filter { it.tableNumber == null }
+
+        val tables = withTable
+            .groupBy { it.tableNumber!! }
+            .toSortedMap()
+            .mapValues { (_, tableConfirmations) ->
+                tableConfirmations.flatMap { listOf(it.mainGuest) + it.secondaryGuests }
+            }
+
+        val unassignedCount = withoutTable.sumOf { 1 + it.secondaryGuests.size }
+
+        return TableListResponse(tables = tables, unassignedCount = unassignedCount)
+    }
+
     fun getConfirmationsByInvitationId(invitationId: String): List<Confirmation> {
         return confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId)
     }

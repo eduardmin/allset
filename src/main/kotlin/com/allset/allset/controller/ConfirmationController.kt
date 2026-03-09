@@ -39,6 +39,16 @@ class ConfirmationController(
         return confirmationService.createConfirmation(confirmation)
     }
 
+    @GetMapping("/invitation/{invitationId}/stats")
+    fun getConfirmationStats(@PathVariable invitationId: String): ConfirmationStatsResponse {
+        return confirmationService.getConfirmationStats(invitationId)
+    }
+
+    @GetMapping("/invitation/{invitationId}/tables")
+    fun getTableList(@PathVariable invitationId: String): TableListResponse {
+        return confirmationService.getTableList(invitationId)
+    }
+
     @GetMapping("/invitation/{invitationId}")
     fun getConfirmationsByInvitation(
         @PathVariable invitationId: String,

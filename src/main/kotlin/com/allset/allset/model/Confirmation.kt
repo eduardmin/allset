@@ -21,6 +21,7 @@ data class Confirmation(
 
 enum class ConfirmationStatus {
     CONFIRMED,
+    PENDING,
     DECLINED
 }
 
