@@ -204,7 +204,7 @@ class ConfirmationService(
             throw IllegalArgumentException("Main guest must be provided.")
         }
 
-        if (confirmation.tableNumber != null && confirmation.tableNumber <= 0) {
+        if (confirmation.tableNumber != null && confirmation.tableNumber < 0) {
             throw IllegalArgumentException("Table number must be greater than zero if provided.")
         }
     }

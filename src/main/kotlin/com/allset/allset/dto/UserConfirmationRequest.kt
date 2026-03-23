@@ -8,7 +8,7 @@ data class UserConfirmationRequest(
     val mainGuest: String,
     val secondaryGuests: List<String> = emptyList(),
     val status: ConfirmationStatus,
-    val guestSide: GuestSide,
+    val guestSide: GuestSide? = null,
     val tableNumber: Int? = null,
     val notes: String? = null
 )

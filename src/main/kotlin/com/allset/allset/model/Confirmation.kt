@@ -11,7 +11,7 @@ data class Confirmation(
     val mainGuest: String,
     val secondaryGuests: List<String> = emptyList(),
     val status: ConfirmationStatus,
-    val guestSide: GuestSide,
+    val guestSide: GuestSide?,
     val tableNumber: Int? = null,
     val notes: String? = null,
     val createdBy: ConfirmationCreator,
