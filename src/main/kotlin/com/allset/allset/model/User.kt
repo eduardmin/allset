@@ -2,6 +2,7 @@ package com.allset.allset.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.Field
 
 @Document(collection = "users")
 data class User(
@@ -14,5 +15,12 @@ data class User(
     val dateOfBirth: String? = null,
     val isPaid: Boolean = false,
     val appliedPromoCodes: List<AppliedPromoCode> = emptyList(),
-    val status: String? = null
+    val status: String? = null,
+    @Field("role")
+    val role: UserRole = UserRole.USER
 )
+
+enum class UserRole {
+    USER,
+    ADMIN
+}

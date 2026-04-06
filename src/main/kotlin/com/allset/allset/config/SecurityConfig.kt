@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -27,7 +28,9 @@ import kotlin.math.min
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig(
+    private val adminAccessFilter: AdminAccessFilter
+) {
 
     private val logger = LoggerFactory.getLogger(SecurityConfig::class.java)
 
@@ -66,6 +69,7 @@ class SecurityConfig {
                     "/swagger-ui.html",
                     "/swagger-ui/**"
                 ).permitAll()
+                    .requestMatchers("/admin/**").authenticated()
                     .anyRequest().authenticated()
             }
             .oauth2ResourceServer { oauth2 ->
@@ -77,6 +81,8 @@ class SecurityConfig {
             .csrf { csrf -> csrf.disable() }
 
             .logout { it.logoutSuccessUrl("/").permitAll() }
+
+        http.addFilterAfter(adminAccessFilter, BearerTokenAuthenticationFilter::class.java)
 
         http.addFilterBefore({ request, response, chain ->
             val authentication = SecurityContextHolder.getContext().authentication
@@ -123,7 +129,11 @@ class SecurityConfig {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration().apply {
-            allowedOrigins = listOf("http://localhost:5173", "http://localhost:3000")
+            allowedOrigins = listOf(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "https://development.d1uukuuqwvhgzl.amplifyapp.com"
+            )
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true

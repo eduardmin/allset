@@ -2,6 +2,7 @@ package com.allset.allset.dto
 
 import com.allset.allset.model.AppliedPromoCode
 import com.allset.allset.model.User
+import com.allset.allset.model.UserRole
 
 data class UserDTO(
     val id: String?,
@@ -11,6 +12,7 @@ data class UserDTO(
     val phoneNumber: String?,
     val dateOfBirth: String?,
     val status: String?,
+    val role: UserRole,
     val appliedPromoCodes: List<AppliedPromoCode>
 )
 
@@ -22,6 +24,7 @@ fun User.toDTO(): UserDTO = UserDTO(
     phoneNumber = this.phoneNumber,
     dateOfBirth = this.dateOfBirth,
     status = this.status,
+    role = this.role,
     appliedPromoCodes = this.appliedPromoCodes
 )
 

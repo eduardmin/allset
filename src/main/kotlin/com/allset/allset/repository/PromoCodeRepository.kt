@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface PromoCodeRepository : MongoRepository<PromoCode, String> {
     fun findByCodeIgnoreCase(code: String): PromoCode?
+    fun countByActiveTrue(): Long
 }

@@ -2,4 +2,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY app.jar /app/app.jar
 EXPOSE 5000
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-jar", "/app/app.jar"]
