@@ -31,7 +31,7 @@ class AdminController(
     }
 
     @GetMapping("/users/{id}/invitations")
-    fun getUserInvitations(@PathVariable id: String): List<Invitation> {
+    fun getUserInvitations(@PathVariable id: String): List<AdminInvitationSummary> {
         return adminService.getUserInvitations(id)
     }
 

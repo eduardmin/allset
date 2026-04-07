@@ -1,21 +1,26 @@
 package com.allset.allset.service
 
+import com.allset.allset.config.LocalizationProperties
 import com.allset.allset.dto.*
 import com.allset.allset.model.*
 import com.allset.allset.repository.ConfirmationRepository
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.PromoCodeRepository
 import com.allset.allset.repository.UserRepository
+import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import java.util.*
 
 @Service
 class AdminService(
     private val userRepository: UserRepository,
     private val invitationRepository: InvitationRepository,
     private val confirmationRepository: ConfirmationRepository,
-    private val promoCodeRepository: PromoCodeRepository
+    private val promoCodeRepository: PromoCodeRepository,
+    private val messageSource: MessageSource,
+    private val localizationProperties: LocalizationProperties
 ) {
 
     // ── Dashboard ──
@@ -51,11 +56,33 @@ class AdminService(
         return user.toAdminResponse(invitationCount)
     }
 
-    fun getUserInvitations(userId: String): List<Invitation> {
+    fun getUserInvitations(userId: String): List<AdminInvitationSummary> {
         userRepository.findById(userId).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "User not found.")
         }
-        return invitationRepository.findAllByOwnerId(userId)
+        val invitations = invitationRepository.findAllByOwnerId(userId)
+        return invitations.map { it.toAdminSummary() }
+    }
+
+    private fun Invitation.toAdminSummary() = AdminInvitationSummary(
+        id = this.id,
+        title = this.title,
+        templateId = this.templateId,
+        templateName = resolveTemplateName(this.templateId),
+        status = this.status,
+        createdAt = this.createdAt,
+        publishedAt = this.publishedAt,
+        expiresAt = this.expiresAt
+    )
+
+    private fun resolveTemplateName(templateId: String): Map<String, String> {
+        return localizationProperties.supportedLanguages.associateWith { lang ->
+            try {
+                messageSource.getMessage("$templateId.name", null, Locale.forLanguageTag(lang))
+            } catch (_: Exception) {
+                templateId
+            }
+        }
     }
 
     fun updateUserRole(userId: String, role: UserRole): AdminUserResponse {

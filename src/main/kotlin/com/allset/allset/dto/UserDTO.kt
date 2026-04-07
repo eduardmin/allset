@@ -3,6 +3,7 @@ package com.allset.allset.dto
 import com.allset.allset.model.AppliedPromoCode
 import com.allset.allset.model.User
 import com.allset.allset.model.UserRole
+import java.time.Instant
 
 data class UserDTO(
     val id: String?,
@@ -13,6 +14,7 @@ data class UserDTO(
     val dateOfBirth: String?,
     val status: String?,
     val role: UserRole,
+    val lastSeenAt: Instant?,
     val appliedPromoCodes: List<AppliedPromoCode>
 )
 
@@ -25,6 +27,7 @@ fun User.toDTO(): UserDTO = UserDTO(
     dateOfBirth = this.dateOfBirth,
     status = this.status,
     role = this.role,
+    lastSeenAt = this.lastSeenAt,
     appliedPromoCodes = this.appliedPromoCodes
 )
 

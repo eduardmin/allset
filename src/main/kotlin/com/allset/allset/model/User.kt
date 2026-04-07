@@ -3,6 +3,7 @@ package com.allset.allset.model
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
+import java.time.Instant
 
 @Document(collection = "users")
 data class User(
@@ -17,7 +18,8 @@ data class User(
     val appliedPromoCodes: List<AppliedPromoCode> = emptyList(),
     val status: String? = null,
     @Field("role")
-    val role: UserRole = UserRole.USER
+    val role: UserRole = UserRole.USER,
+    val lastSeenAt: Instant? = null
 )
 
 enum class UserRole {

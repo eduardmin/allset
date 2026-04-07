@@ -10,6 +10,7 @@ import com.allset.allset.repository.ConfirmationRepository
 import org.slf4j.LoggerFactory
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class UserService(
@@ -95,6 +96,11 @@ class UserService(
 
         userRepository.save(userToUpdate)
         return updatedFields
+    }
+
+    fun updateLastSeen(userId: String) {
+        val user = userRepository.findById(userId).orElse(null) ?: return
+        userRepository.save(user.copy(lastSeenAt = Instant.now()))
     }
 
     fun deleteCurrentUser() {
