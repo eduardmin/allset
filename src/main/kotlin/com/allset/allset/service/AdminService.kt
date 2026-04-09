@@ -206,7 +206,7 @@ class AdminService(
 
     // ── Template Defaults ──
 
-    fun getTemplateDefaults(templateId: String): TemplateDefaultsConfig? {
+    fun getTemplateDefaults(templateId: String): TemplateDefaultsConfig {
         return invitationDefaultsService.getTemplateDefaults(templateId)
     }
 

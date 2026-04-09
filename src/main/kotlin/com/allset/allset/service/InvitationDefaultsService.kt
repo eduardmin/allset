@@ -42,8 +42,14 @@ class InvitationDefaultsService(
         return custom?.ourStoryText ?: getLocalizedMessages("ourstory.default.text")
     }
 
-    fun getTemplateDefaults(templateId: String): TemplateDefaultsConfig? {
-        return templateDefaultsRepository.findByTemplateId(templateId)
+    fun getTemplateDefaults(templateId: String): TemplateDefaultsConfig {
+        return TemplateDefaultsConfig(
+            templateId = templateId,
+            description = getDefaultDescription(templateId),
+            agendaTitles = getDefaultAgendaTitles(templateId),
+            dressCodeDescription = getDefaultDressCodeDescription(templateId),
+            ourStoryText = getDefaultOurStoryText(templateId)
+        )
     }
 
     fun updateTemplateDefaults(templateId: String, update: TemplateDefaultsConfig): TemplateDefaultsConfig {

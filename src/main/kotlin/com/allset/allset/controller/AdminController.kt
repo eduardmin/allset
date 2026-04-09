@@ -130,7 +130,7 @@ class AdminController(
     // ── Template Defaults ──
 
     @GetMapping("/templates/{templateId}/defaults")
-    fun getTemplateDefaults(@PathVariable templateId: String): TemplateDefaultsConfig? {
+    fun getTemplateDefaults(@PathVariable templateId: String): TemplateDefaultsConfig {
         return adminService.getTemplateDefaults(templateId)
     }
 
