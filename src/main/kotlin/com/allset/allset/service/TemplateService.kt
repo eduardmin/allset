@@ -31,13 +31,13 @@ class TemplateService(
 
         return listOf(
             buildTemplate(
-                id = "template.classic.elegance",
-                type = TemplateType.Classic_Elegance,
-                imageUrl = s3Service.getTemplateUrl("classic_elegance.png"),
-                mobileImageUrl = s3Service.getTemplateUrl("classic_elegance_mobile.png"),
-                mainImageMaxCount = 5,
-                albumImageMaxCount = 5,
-                paletteIds = listOf("romantic_rose", "classic_elegance"),
+                id = "template.rustic.love.story",
+                type = TemplateType.Rustic_Love_Story,
+                imageUrl = s3Service.getTemplateUrl("rustic_love_story.png"),
+                mobileImageUrl = s3Service.getTemplateUrl("rustic_love_story_mobile.png"),
+                mainImageMaxCount = 4,
+                albumImageMaxCount = 4,
+                paletteIds = listOf("classic_elegance", "ocean_breeze"),
                 pricingSummary = pricingSummary,
                 defaults = defaults
             ),
@@ -53,16 +53,16 @@ class TemplateService(
                 defaults = defaults
             ),
             buildTemplate(
-                id = "template.rustic.love.story",
-                type = TemplateType.Rustic_Love_Story,
-                imageUrl = s3Service.getTemplateUrl("rustic_love_story.png"),
-                mobileImageUrl = s3Service.getTemplateUrl("rustic_love_story_mobile.png"),
-                mainImageMaxCount = 4,
-                albumImageMaxCount = 4,
-                paletteIds = listOf("classic_elegance", "ocean_breeze"),
+                id = "template.classic.elegance",
+                type = TemplateType.Classic_Elegance,
+                imageUrl = s3Service.getTemplateUrl("classic_elegance.png"),
+                mobileImageUrl = s3Service.getTemplateUrl("classic_elegance_mobile.png"),
+                mainImageMaxCount = 5,
+                albumImageMaxCount = 5,
+                paletteIds = listOf("romantic_rose", "classic_elegance"),
                 pricingSummary = pricingSummary,
                 defaults = defaults
-            )
+            ),
         )
     }
 
