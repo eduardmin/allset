@@ -134,7 +134,8 @@ class SecurityConfig(
                 "http://localhost:3000",
                 "https://development.d1uukuuqwvhgzl.amplifyapp.com",
                 "https://id-preview--d66c7f74-5c92-42e9-87b5-2be960e1fcc3.lovable.app",
-                "https://d66c7f74-5c92-42e9-87b5-2be960e1fcc3.lovableproject.com"
+                "https://d66c7f74-5c92-42e9-87b5-2be960e1fcc3.lovableproject.com",
+                "https://admin.allset.am"
             )
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
             allowedHeaders = listOf("*")
