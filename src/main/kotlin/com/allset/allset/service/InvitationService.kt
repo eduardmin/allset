@@ -234,38 +234,31 @@ class InvitationService(
     }
 
     private fun applyDefaults(invitation: Invitation): Invitation {
-        // Check if description is null or empty
+        val tId = invitation.templateId
+
         val description = if (invitation.description == null || invitation.description.values.all { it.isBlank() }) {
-            invitationDefaultsService.getDefaultDescription()
+            invitationDefaultsService.getDefaultDescription(tId)
         } else {
             invitation.description
         }
 
-        // Apply default dress code if missing entirely OR if description is empty
         val dressCode = when {
-            // If dressCode is null, don't create a default one (user didn't want it)
             invitation.dressCode == null -> null
-            // If dressCode exists but description is empty, fill with defaults
             invitation.dressCode.description.values.all { it.isBlank() } -> {
                 invitation.dressCode.copy(
-                    description = invitationDefaultsService.getDefaultDressCodeDescription()
+                    description = invitationDefaultsService.getDefaultDressCodeDescription(tId)
                 )
             }
-            // Otherwise keep the user's description
             else -> invitation.dressCode
         }
 
-        // Apply default our story text if missing or empty
         val ourStory = when {
-            // If ourStory is null, don't create a default one
             invitation.ourStory == null -> null
-            // If ourStory exists but text is empty, fill with defaults
             invitation.ourStory.text.values.all { it.isBlank() } -> {
                 invitation.ourStory.copy(
-                    text = invitationDefaultsService.getDefaultOurStoryText()
+                    text = invitationDefaultsService.getDefaultOurStoryText(tId)
                 )
             }
-            // Otherwise keep the user's text
             else -> invitation.ourStory
         }
 

@@ -7,6 +7,7 @@ import com.allset.allset.repository.ConfirmationRepository
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.PromoCodeRepository
 import com.allset.allset.repository.UserRepository
+import com.allset.allset.service.InvitationDefaultsService
 import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -20,7 +21,8 @@ class AdminService(
     private val confirmationRepository: ConfirmationRepository,
     private val promoCodeRepository: PromoCodeRepository,
     private val messageSource: MessageSource,
-    private val localizationProperties: LocalizationProperties
+    private val localizationProperties: LocalizationProperties,
+    private val invitationDefaultsService: InvitationDefaultsService
 ) {
 
     // ── Dashboard ──
@@ -200,5 +202,19 @@ class AdminService(
             ResponseStatusException(HttpStatus.NOT_FOUND, "Confirmation not found.")
         }
         confirmationRepository.delete(confirmation)
+    }
+
+    // ── Template Defaults ──
+
+    fun getTemplateDefaults(templateId: String): TemplateDefaultsConfig? {
+        return invitationDefaultsService.getTemplateDefaults(templateId)
+    }
+
+    fun updateTemplateDefaults(templateId: String, update: TemplateDefaultsConfig): TemplateDefaultsConfig {
+        return invitationDefaultsService.updateTemplateDefaults(templateId, update)
+    }
+
+    fun resetTemplateDefaults(templateId: String) {
+        invitationDefaultsService.resetTemplateDefaults(templateId)
     }
 }

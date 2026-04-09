@@ -27,7 +27,6 @@ class TemplateService(
     fun getTemplates(): List<Template> {
         val appliedPromoCodes = userService.getCurrentUserOrNull()?.appliedPromoCodes ?: emptyList()
         val pricingSummary = pricingService.summarize(appliedPromoCodes)
-        val defaults = buildDefaults()
 
         return listOf(
             buildTemplate(
@@ -38,8 +37,7 @@ class TemplateService(
                 mainImageMaxCount = 4,
                 albumImageMaxCount = 4,
                 paletteIds = listOf("classic_elegance", "ocean_breeze"),
-                pricingSummary = pricingSummary,
-                defaults = defaults
+                pricingSummary = pricingSummary
             ),
             buildTemplate(
                 id = "template.modern.romance",
@@ -49,8 +47,7 @@ class TemplateService(
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("garden_party", "golden_sunset"),
-                pricingSummary = pricingSummary,
-                defaults = defaults
+                pricingSummary = pricingSummary
             ),
             buildTemplate(
                 id = "template.classic.elegance",
@@ -60,8 +57,7 @@ class TemplateService(
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
                 paletteIds = listOf("romantic_rose", "classic_elegance"),
-                pricingSummary = pricingSummary,
-                defaults = defaults
+                pricingSummary = pricingSummary
             ),
         )
     }
@@ -74,9 +70,9 @@ class TemplateService(
         mainImageMaxCount: Int,
         albumImageMaxCount: Int,
         paletteIds: List<String>,
-        pricingSummary: PricingSummary,
-        defaults: TemplateDefaults
+        pricingSummary: PricingSummary
     ): Template {
+        val defaults = buildDefaults(id)
         return Template(
             id = id,
             type = type,
@@ -96,12 +92,12 @@ class TemplateService(
         )
     }
 
-    private fun buildDefaults(): TemplateDefaults {
+    private fun buildDefaults(templateId: String): TemplateDefaults {
         return TemplateDefaults(
-            description = invitationDefaultsService.getDefaultDescription(),
-            agendaTitles = invitationDefaultsService.getDefaultAgendaTitles(),
-            dressCodeDescription = invitationDefaultsService.getDefaultDressCodeDescription(),
-            ourStoryText = invitationDefaultsService.getDefaultOurStoryText()
+            description = invitationDefaultsService.getDefaultDescription(templateId),
+            agendaTitles = invitationDefaultsService.getDefaultAgendaTitles(templateId),
+            dressCodeDescription = invitationDefaultsService.getDefaultDressCodeDescription(templateId),
+            ourStoryText = invitationDefaultsService.getDefaultOurStoryText(templateId)
         )
     }
 

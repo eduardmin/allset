@@ -126,4 +126,24 @@ class AdminController(
     fun deleteConfirmation(@PathVariable id: String) {
         adminService.deleteConfirmation(id)
     }
+
+    // ── Template Defaults ──
+
+    @GetMapping("/templates/{templateId}/defaults")
+    fun getTemplateDefaults(@PathVariable templateId: String): TemplateDefaultsConfig? {
+        return adminService.getTemplateDefaults(templateId)
+    }
+
+    @PutMapping("/templates/{templateId}/defaults")
+    fun updateTemplateDefaults(
+        @PathVariable templateId: String,
+        @RequestBody body: TemplateDefaultsConfig
+    ): TemplateDefaultsConfig {
+        return adminService.updateTemplateDefaults(templateId, body)
+    }
+
+    @DeleteMapping("/templates/{templateId}/defaults")
+    fun resetTemplateDefaults(@PathVariable templateId: String) {
+        adminService.resetTemplateDefaults(templateId)
+    }
 }
