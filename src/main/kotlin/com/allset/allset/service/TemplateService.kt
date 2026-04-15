@@ -24,6 +24,10 @@ class TemplateService(
         return localizationProperties.supportedLanguages
     }
 
+    fun getTemplateById(id: String): Template? {
+        return getTemplates().find { it.id == id }
+    }
+
     fun getTemplates(): List<Template> {
         val appliedPromoCodes = userService.getCurrentUserOrNull()?.appliedPromoCodes ?: emptyList()
         val pricingSummary = pricingService.summarize(appliedPromoCodes)
