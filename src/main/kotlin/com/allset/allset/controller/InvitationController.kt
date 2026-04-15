@@ -1,9 +1,6 @@
 package com.allset.allset.controller
 
-import com.allset.allset.dto.InvitationDTO
-import com.allset.allset.dto.PartialInvitationDTO
-import com.allset.allset.dto.toDTO
-import com.allset.allset.dto.toEntity
+import com.allset.allset.dto.*
 import com.allset.allset.service.AuthenticationService
 import com.allset.allset.service.ConfirmationService
 import com.allset.allset.service.InvitationService
@@ -21,26 +18,15 @@ class InvitationController(
     private val confirmationService: ConfirmationService
 ) {
 
-    // Create new draft
     @PostMapping("/draft")
-    fun createDraft(@RequestBody invitationDTO: InvitationDTO): InvitationDTO {
+    fun saveDraft(@RequestBody dto: PartialInvitationDTO): InvitationDTO {
         val userId = authenticationService.getCurrentUserId()
-        val invitation = invitationDTO.toEntity(userId)
-        return invitationService.saveDraft(invitation).toDTO()
-    }
-
-    // Update existing draft (full update)
-    @PutMapping("/draft/{id}")
-    fun updateDraft(@PathVariable id: String, @RequestBody invitationDTO: InvitationDTO): InvitationDTO {
-        val userId = authenticationService.getCurrentUserId()
-        val invitation = invitationDTO.toEntity(userId)
-        return invitationService.updateDraft(id, invitation).toDTO()
-    }
-
-    // Partial update draft (for auto-save)
-    @PatchMapping("/draft/{id}")
-    fun patchDraft(@PathVariable id: String, @RequestBody patch: PartialInvitationDTO): InvitationDTO {
-        return invitationService.patchDraft(id, patch).toDTO()
+        return if (dto.id != null) {
+            invitationService.patchDraft(dto.id, dto).toDTO()
+        } else {
+            val invitation = dto.toNewEntity(userId)
+            invitationService.saveDraft(invitation).toDTO()
+        }
     }
 
     // Delete draft

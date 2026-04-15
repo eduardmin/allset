@@ -44,36 +44,6 @@ class InvitationService(
         return invitationRepository.save(invitationToSave)
     }
 
-    // Update existing draft (full update)
-    fun updateDraft(id: String, updatedInvitation: Invitation): Invitation {
-        val userId = authenticationService.getCurrentUserId()
-        
-        val existingDraft = invitationRepository.findById(id).orElseThrow {
-            IllegalArgumentException("Draft with id $id not found")
-        }
-
-        if (existingDraft.ownerId != userId) {
-            throw IllegalAccessException("Unauthorized to update this draft")
-        }
-
-        if (existingDraft.status != InvitationStatus.DRAFT) {
-            throw IllegalStateException("Can only update drafts, not published invitations")
-        }
-
-        // Apply defaults for missing fields
-        val invitationWithDefaults = applyDefaults(updatedInvitation)
-
-        val invitationToSave = invitationWithDefaults.copy(
-            id = id,
-            ownerId = userId,
-            status = InvitationStatus.DRAFT,
-            createdAt = existingDraft.createdAt, // Keep original creation time
-            lastModifiedAt = Instant.now()
-        )
-        
-        return invitationRepository.save(invitationToSave)
-    }
-
     // Partial update draft (for auto-save)
     fun patchDraft(id: String, patch: PartialInvitationDTO): Invitation {
         val userId = authenticationService.getCurrentUserId()

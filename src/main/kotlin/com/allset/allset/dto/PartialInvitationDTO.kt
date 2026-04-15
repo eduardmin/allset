@@ -3,6 +3,7 @@ package com.allset.allset.dto
 import com.allset.allset.model.Invitation
 
 data class PartialInvitationDTO(
+    val id: String? = null,
     val templateId: String? = null,
     val title: Map<String, String>? = null,
     val urlExtension: String? = null,
@@ -18,6 +19,25 @@ data class PartialInvitationDTO(
     val ourStory: OurStoryDTO? = null,
     val languages: List<String>? = null,
     val colorPaletteId: String? = null
+)
+
+fun PartialInvitationDTO.toNewEntity(ownerId: String) = Invitation(
+    templateId = templateId ?: "",
+    ownerId = ownerId,
+    title = title ?: emptyMap(),
+    urlExtension = urlExtension ?: "",
+    eventDate = eventDate,
+    description = description,
+    mainImages = mainImages,
+    confirmationEnabled = confirmationEnabled ?: false,
+    timeline = timeline?.map { it.toEntity() },
+    countDown = countDown ?: false,
+    connectWithUs = connectWithUs?.toEntity(),
+    dressCode = dressCode?.toEntity(),
+    albumLink = albumLink,
+    ourStory = ourStory?.toEntity(),
+    languages = languages ?: listOf("en"),
+    colorPaletteId = colorPaletteId
 )
 
 fun Invitation.mergeWithPartialUpdate(update: PartialInvitationDTO): Invitation {
