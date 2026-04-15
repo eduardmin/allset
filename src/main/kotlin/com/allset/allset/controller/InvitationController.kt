@@ -35,6 +35,11 @@ class InvitationController(
         invitationService.deleteDraft(id)
     }
 
+    @DeleteMapping("/drafts")
+    fun deleteAllDrafts() {
+        invitationService.deleteAllDrafts()
+    }
+
     // Get all drafts
     @GetMapping("/drafts")
     fun getDrafts(): List<InvitationDTO> {

@@ -86,10 +86,15 @@ class InvitationService(
         invitationRepository.deleteById(id)
     }
 
-    // Get all drafts for current user
     fun getDrafts(): List<Invitation> {
         val userId = authenticationService.getCurrentUserId()
         return invitationRepository.findAllByOwnerIdAndStatus(userId, InvitationStatus.DRAFT)
+    }
+
+    fun deleteAllDrafts() {
+        val userId = authenticationService.getCurrentUserId()
+        val drafts = invitationRepository.findAllByOwnerIdAndStatus(userId, InvitationStatus.DRAFT)
+        invitationRepository.deleteAll(drafts)
     }
 
     // Get active invitations (published)
