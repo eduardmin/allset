@@ -9,6 +9,7 @@ import java.time.Instant
 data class User(
     @Id
     val id: String? = null,
+    val sub: String? = null,
     val email: String,
     val name: String,
     val picture: String?,

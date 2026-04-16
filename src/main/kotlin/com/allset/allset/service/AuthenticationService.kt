@@ -22,50 +22,40 @@ class AuthenticationService(
     fun getCurrentUserIdOrNull(): String? {
         val authentication = SecurityContextHolder.getContext().authentication ?: return null
         val jwt = authentication.principal as? Jwt ?: return null
-        
-        logger.info("🔍 JWT Claims: ${jwt.claims}")
-        
-        // Try email from JWT token first
+
+        val sub = jwt.getClaim<String>("sub") ?: return null
+
+        val existingUser = userRepository.findBySub(sub)
+        if (existingUser != null) {
+            return existingUser.id
+        }
+
         var email = jwt.getClaim<String>("email")
         var name = jwt.getClaim<String>("name") ?: jwt.getClaim<String>("nickname")
         var picture = jwt.getClaim<String>("picture")
-        
-        // If email not in JWT, fetch from Auth0 UserInfo endpoint
+
         if (email == null) {
-            logger.info("📧 Email not in JWT, fetching from Auth0 UserInfo endpoint...")
-            val accessToken = jwt.tokenValue
-            val userInfo = auth0UserInfoService.getUserInfo(accessToken)
-            
+            logger.info("New user, fetching profile from Auth0 UserInfo...")
+            val userInfo = auth0UserInfoService.getUserInfo(jwt.tokenValue)
             if (userInfo != null) {
                 email = userInfo.email
                 name = userInfo.name ?: userInfo.nickname
                 picture = userInfo.picture
-                logger.info("✅ Retrieved email from UserInfo: $email")
-            } else {
-                logger.warn("⚠️ Could not fetch user info from Auth0")
             }
         }
-        
-        if (email != null) {
-            logger.info("📧 Using email: $email")
-            var user = userRepository.findByEmail(email)
-            
-            // Auto-create user if doesn't exist
-            if (user == null) {
-                logger.info("🆕 User not found, creating new user with email: $email")
-                val newUser = User(
-                    email = email, 
-                    name = name ?: "User", 
-                    picture = picture
-                )
-                user = userRepository.save(newUser)
-                logger.info("✅ Created new user: ${user.id}")
-            }
-            
-            return user.id
+
+        if (email == null) {
+            logger.warn("No email found in JWT or UserInfo for sub: $sub")
+            return null
         }
-        
-        logger.warn("⚠️ No email found in JWT or UserInfo")
-        return null
+
+        var user = userRepository.findByEmail(email)
+        if (user != null) {
+            user = userRepository.save(user.copy(sub = sub))
+        } else {
+            user = userRepository.save(User(sub = sub, email = email, name = name ?: "User", picture = picture))
+        }
+
+        return user.id
     }
 }
