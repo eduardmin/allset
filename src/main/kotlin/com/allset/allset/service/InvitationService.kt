@@ -7,7 +7,9 @@ import com.allset.allset.model.InvitationStatus
 import com.allset.allset.repository.ConfirmationRepository
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.UserRepository
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -160,18 +162,36 @@ class InvitationService(
         return invitationRepository.save(publishedInvitation)
     }
 
+    fun validateForPayment(invitationId: String): Invitation {
+        val userId = authenticationService.getCurrentUserId()
+        val invitation = invitationRepository.findById(invitationId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found")
+        }
+
+        if (invitation.ownerId != userId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Not your invitation")
+        }
+
+        if (invitation.status != InvitationStatus.DRAFT) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation is already ${invitation.status}")
+        }
+
+        validateForPublishing(invitation)
+        return invitation
+    }
+
     private fun validateForPublishing(invitation: Invitation) {
         if (invitation.title.values.all { it.isBlank() }) {
-            throw IllegalArgumentException("Title is required to publish")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Title is required to publish")
         }
         if (invitation.urlExtension.isBlank()) {
-            throw IllegalArgumentException("URL extension is required to publish")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "URL extension is required to publish")
         }
         if (invitation.eventDate == null || invitation.eventDate.isBlank()) {
-            throw IllegalArgumentException("Event date is required to publish")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Event date is required to publish")
         }
         if (invitation.mainImages == null || invitation.mainImages.isEmpty()) {
-            throw IllegalArgumentException("At least one main image is required to publish")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one main image is required to publish")
         }
     }
 

@@ -43,6 +43,12 @@ app:
         discount-value: 10
         active: true
 
+idram:
+  rec-account: ${IDRAM_REC_ACCOUNT:}
+  secret-key: ${IDRAM_SECRET_KEY:}
+  success-url: ${IDRAM_SUCCESS_URL:https://allset.am/payment/success}
+  fail-url: ${IDRAM_FAIL_URL:https://allset.am/payment/fail}
+
 aws:
   s3:
     bucket: ${AWS_S3_BUCKET:allset-images}
