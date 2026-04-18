@@ -7,6 +7,7 @@ import java.time.Instant
 data class InvitationDTO(
     val id: String? = null,
     val templateId: String,
+    val template: Template? = null,
     val title: Map<String, String>,
     val urlExtension: String,
     val eventDate: String? = null,
@@ -76,9 +77,10 @@ fun InvitationDTO.toEntity(ownerId: String) = Invitation(
     expiresAt = expiresAt
 )
 
-fun Invitation.toDTO(guestCount: Int? = null) = InvitationDTO(
+fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null) = InvitationDTO(
     id = id,
     templateId = templateId,
+    template = template,
     title = title,
     urlExtension = urlExtension,
     eventDate = eventDate,

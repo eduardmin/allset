@@ -4,6 +4,7 @@ import com.allset.allset.dto.*
 import com.allset.allset.service.AuthenticationService
 import com.allset.allset.service.ConfirmationService
 import com.allset.allset.service.InvitationService
+import com.allset.allset.service.TemplateService
 import com.allset.allset.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -15,7 +16,8 @@ class InvitationController(
     private val invitationService: InvitationService, 
     private val authenticationService: AuthenticationService, 
     private val userService: UserService,
-    private val confirmationService: ConfirmationService
+    private val confirmationService: ConfirmationService,
+    private val templateService: TemplateService
 ) {
 
     @PostMapping("/draft")
@@ -87,7 +89,9 @@ class InvitationController(
 
     @GetMapping("/{id}")
     fun getInvitationById(@PathVariable id: String): InvitationDTO? {
-        return invitationService.getInvitationById(id)?.toDTO()
+        val invitation = invitationService.getInvitationById(id) ?: return null
+        val template = templateService.getTemplateById(invitation.templateId)
+        return invitation.toDTO(template = template)
     }
 
     @PutMapping("/{id}")
@@ -110,6 +114,8 @@ class InvitationController(
 
     @GetMapping("/url/{url}")
     fun getInvitationByUrlExtension(@PathVariable url: String): InvitationDTO? {
-        return invitationService.getInvitationByUrlExtension(url)?.toDTO()
+        val invitation = invitationService.getInvitationByUrlExtension(url) ?: return null
+        val template = templateService.getTemplateById(invitation.templateId)
+        return invitation.toDTO(template = template)
     }
 }
