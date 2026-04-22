@@ -60,7 +60,10 @@ class TemplateService(
                 mobileImageUrl = s3Service.getTemplateUrl("classic_elegance_mobile.png"),
                 mainImageMaxCount = 5,
                 albumImageMaxCount = 5,
-                paletteIds = listOf("romantic_rose", "classic_elegance"),
+                paletteIds = listOf(
+                    "charcoal_noir", "bordeaux", "midnight_navy", "forest_night",
+                    "blossom_pink", "aqua_dream", "honey_dew"
+                ),
                 pricingSummary = pricingSummary
             ),
         )

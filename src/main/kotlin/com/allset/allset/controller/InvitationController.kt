@@ -70,16 +70,14 @@ class InvitationController(
     }
 
     @PostMapping
-    fun createInvitation(@RequestBody invitationDTO: InvitationDTO): InvitationDTO {
+    fun saveInvitation(@RequestBody dto: PartialInvitationDTO): InvitationDTO {
         val userId = authenticationService.getCurrentUserId()
-        val user = userService.getCurrentUser()
-
-//        if (!user.isPaid) {
-//            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You must complete payment to create an invitation.")
-//        }
-
-        val invitation = invitationDTO.toEntity(userId)
-        return invitationService.createInvitation(invitation).toDTO()
+        return if (dto.id != null) {
+            invitationService.patchInvitation(dto.id, dto).toDTO()
+        } else {
+            val invitation = dto.toNewEntity(userId)
+            invitationService.createInvitation(invitation).toDTO()
+        }
     }
 
     @GetMapping
@@ -92,18 +90,6 @@ class InvitationController(
         val invitation = invitationService.getInvitationById(id) ?: return null
         val template = templateService.getTemplateById(invitation.templateId)
         return invitation.toDTO(template = template)
-    }
-
-    @PutMapping("/{id}")
-    fun updateInvitation(@PathVariable id: String, @RequestBody invitationDTO: InvitationDTO): InvitationDTO? {
-        val userId = authenticationService.getCurrentUserId()
-        val invitation = invitationDTO.toEntity(userId)
-        return invitationService.updateInvitation(id, invitation)?.toDTO()
-    }
-
-    @PatchMapping("/{id}")
-    fun patchInvitation(@PathVariable id: String, @RequestBody patch: PartialInvitationDTO): InvitationDTO {
-        return invitationService.patchInvitation(id, patch).toDTO()
     }
 
 

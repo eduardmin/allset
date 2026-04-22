@@ -35,6 +35,34 @@ class ColorPaletteService(
         buildPalette(
             id = "ocean_breeze",
             colors = listOf("#DBEAFE", "#93C5FD", "#3B82F6", "#1E3A8A")
+        ),
+        buildPalette(
+            id = "charcoal_noir",
+            colors = listOf("#2A2A2A", "#323232", "#3E433C", "#D9D9D9")
+        ),
+        buildPalette(
+            id = "bordeaux",
+            colors = listOf("#240F0F", "#3E1A1A", "#7A3838", "#D9D9D9")
+        ),
+        buildPalette(
+            id = "midnight_navy",
+            colors = listOf("#0F1624", "#1A273E", "#2E4A70", "#D9D9D9")
+        ),
+        buildPalette(
+            id = "forest_night",
+            colors = listOf("#16332F", "#122B28", "#1E4A42", "#D9D9D9")
+        ),
+        buildPalette(
+            id = "blossom_pink",
+            colors = listOf("#A85A72", "#C47A90", "#E8A8BB", "#F5DDE5")
+        ),
+        buildPalette(
+            id = "aqua_dream",
+            colors = listOf("#4A8A9A", "#6AACBA", "#9FD0DC", "#D0EEF5")
+        ),
+        buildPalette(
+            id = "honey_dew",
+            colors = listOf("#5A9A6A", "#7AB88A", "#A8D8B0", "#D8F0E0")
         )
     ).associateBy { it.id }
 
