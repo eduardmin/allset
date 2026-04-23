@@ -20,6 +20,7 @@ data class InvitationDTO(
     val connectWithUs: ConnectWithUsDTO? = null,
     val dressCode: DressCodeDTO? = null,
     val albumLink: String? = null,
+    val eventVenue: EventVenueDTO? = null,
     val ourStory: OurStoryDTO? = null,
     val languages: List<String> = listOf("en"),
     val colorPaletteId: String? = null,
@@ -50,6 +51,11 @@ data class DressCodeDTO(
     val colorPaletteId: String?
 )
 
+data class EventVenueDTO(
+    val name: String,
+    val locationLink: String? = null
+)
+
 data class OurStoryDTO(
     val text: Map<String, String>,
     val photoUrls: List<String>
@@ -70,6 +76,7 @@ fun InvitationDTO.toEntity(ownerId: String) = Invitation(
     connectWithUs = connectWithUs?.toEntity(),
     dressCode = dressCode?.toEntity(),
     albumLink = albumLink,
+    eventVenue = eventVenue?.toEntity(),
     ourStory = ourStory?.toEntity(),
     languages = languages,
     colorPaletteId = colorPaletteId,
@@ -92,6 +99,7 @@ fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null) = Invi
     connectWithUs = connectWithUs?.toDTO(),
     dressCode = dressCode?.toDTO(),
     albumLink = albumLink,
+    eventVenue = eventVenue?.toDTO(),
     ourStory = ourStory?.toDTO(),
     languages = languages,
     colorPaletteId = colorPaletteId,
@@ -112,6 +120,9 @@ fun ConnectWithUs.toDTO() = ConnectWithUsDTO(name, phone, email)
 
 fun DressCodeDTO.toEntity() = DressCode(description, style, colorPaletteId)
 fun DressCode.toDTO() = DressCodeDTO(description, style, colorPaletteId)
+
+fun EventVenueDTO.toEntity() = EventVenue(name, locationLink)
+fun EventVenue.toDTO() = EventVenueDTO(name, locationLink)
 
 fun OurStoryDTO.toEntity() = OurStory(text, photoUrls)
 fun OurStory.toDTO() = OurStoryDTO(text, photoUrls)

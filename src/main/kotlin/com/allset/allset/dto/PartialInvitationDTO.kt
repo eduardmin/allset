@@ -16,6 +16,7 @@ data class PartialInvitationDTO(
     val connectWithUs: ConnectWithUsDTO? = null,
     val dressCode: DressCodeDTO? = null,
     val albumLink: String? = null,
+    val eventVenue: EventVenueDTO? = null,
     val ourStory: OurStoryDTO? = null,
     val languages: List<String>? = null,
     val colorPaletteId: String? = null
@@ -35,6 +36,7 @@ fun PartialInvitationDTO.toNewEntity(ownerId: String) = Invitation(
     connectWithUs = connectWithUs?.toEntity(),
     dressCode = dressCode?.toEntity(),
     albumLink = albumLink,
+    eventVenue = eventVenue?.toEntity(),
     ourStory = ourStory?.toEntity(),
     languages = languages ?: listOf("en"),
     colorPaletteId = colorPaletteId
@@ -53,6 +55,7 @@ fun Invitation.mergeWithPartialUpdate(update: PartialInvitationDTO): Invitation 
         connectWithUs = update.connectWithUs?.toEntity() ?: this.connectWithUs,
         dressCode = update.dressCode?.toEntity() ?: this.dressCode,
         albumLink = update.albumLink ?: this.albumLink,
+        eventVenue = update.eventVenue?.toEntity() ?: this.eventVenue,
         ourStory = update.ourStory?.toEntity() ?: this.ourStory,
         languages = update.languages ?: this.languages,
         colorPaletteId = update.colorPaletteId ?: this.colorPaletteId

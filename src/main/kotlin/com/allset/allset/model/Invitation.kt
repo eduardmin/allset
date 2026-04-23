@@ -21,6 +21,7 @@ data class Invitation(
     val connectWithUs: ConnectWithUs? = null,
     val dressCode: DressCode? = null,
     val albumLink: String? = null,
+    val eventVenue: EventVenue? = null,
     val ourStory: OurStory? = null,
     val languages: List<String> = listOf("en"),
     val colorPaletteId: String? = null,
@@ -48,6 +49,11 @@ data class DressCode(
     val description: Map<String, String>,
     val style: String,
     val colorPaletteId: String? = null
+)
+
+data class EventVenue(
+    val name: String,
+    val locationLink: String? = null
 )
 
 data class OurStory(

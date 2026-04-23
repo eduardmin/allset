@@ -63,6 +63,46 @@ class ColorPaletteService(
         buildPalette(
             id = "honey_dew",
             colors = listOf("#5A9A6A", "#7AB88A", "#A8D8B0", "#D8F0E0")
+        ),
+        buildPalette(
+            id = "sage_garden",
+            colors = listOf("#3E433C", "#6F786C", "#A3AAA1", "#D3C6B1")
+        ),
+        buildPalette(
+            id = "rosewood",
+            colors = listOf("#5C474E", "#947575", "#C4A4A4", "#E8D5D5")
+        ),
+        buildPalette(
+            id = "coastal_mist",
+            colors = listOf("#2A5C5E", "#6A8D8E", "#7EA7A8", "#B0D0D1")
+        ),
+        buildPalette(
+            id = "terracotta_sun",
+            colors = listOf("#5C2E20", "#8B4A3A", "#C4897A", "#D4B8A8")
+        ),
+        buildPalette(
+            id = "midnight_bloom",
+            colors = listOf("#2C2E52", "#4A4E7A", "#8A8EB5", "#C8C5DC")
+        ),
+        buildPalette(
+            id = "velvet_plum",
+            colors = listOf("#52334A", "#7A5468", "#B08898", "#D4BECB")
+        ),
+        buildPalette(
+            id = "warm_linen",
+            colors = listOf("#3D3B33", "#D9D0B0", "#E4E8DE", "#F5F5F5")
+        ),
+        buildPalette(
+            id = "dusty_lilac",
+            colors = listOf("#332E48", "#7060A0", "#C9B8E0", "#E0DCEA")
+        ),
+        buildPalette(
+            id = "muted_sage",
+            colors = listOf("#2E3D2E", "#6D9060", "#9AB88A", "#D8E0D2")
+        ),
+        buildPalette(
+            id = "copper_dusk",
+            colors = listOf("#3D2010", "#A05A38", "#C87E5A", "#EDE0D4")
         )
     ).associateBy { it.id }
 
