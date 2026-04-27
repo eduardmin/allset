@@ -47,6 +47,7 @@ fun Invitation.mergeWithPartialUpdate(update: PartialInvitationDTO): Invitation 
         templateId = update.templateId ?: this.templateId,
         title = update.title ?: this.title,
         urlExtension = update.urlExtension ?: this.urlExtension,
+        eventDate = update.eventDate ?: this.eventDate,
         description = update.description ?: this.description,
         mainImages = update.mainImages ?: this.mainImages,
         confirmationEnabled = update.confirmationEnabled ?: this.confirmationEnabled,
