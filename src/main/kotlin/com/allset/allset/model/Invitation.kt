@@ -47,7 +47,6 @@ data class ConnectWithUs(
 
 data class DressCode(
     val description: Map<String, String>,
-    val style: String,
     val colorPaletteId: String? = null
 )
 

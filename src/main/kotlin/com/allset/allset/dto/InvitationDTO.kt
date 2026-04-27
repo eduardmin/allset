@@ -13,7 +13,6 @@ data class InvitationDTO(
     val eventDate: String? = null,
     val description: Map<String, String>? = null,
     val mainImages: List<String>? = null,
-    val closingText: Map<String, String>? = null,
     val confirmationEnabled: Boolean,
     val timeline: List<TimelineEventDTO>? = null,
     val countDown: Boolean = false,
@@ -47,8 +46,7 @@ data class ConnectWithUsDTO(
 
 data class DressCodeDTO(
     val description: Map<String, String>,
-    val style: String,
-    val colorPaletteId: String?
+    val colorPaletteId: String? = null
 )
 
 data class EventVenueDTO(
@@ -118,8 +116,8 @@ fun TimelineEvent.toDTO() = TimelineEventDTO(time, venueName, venueLocation)
 fun ConnectWithUsDTO.toEntity() = ConnectWithUs(name, phone, email)
 fun ConnectWithUs.toDTO() = ConnectWithUsDTO(name, phone, email)
 
-fun DressCodeDTO.toEntity() = DressCode(description, style, colorPaletteId)
-fun DressCode.toDTO() = DressCodeDTO(description, style, colorPaletteId)
+fun DressCodeDTO.toEntity() = DressCode(description, colorPaletteId)
+fun DressCode.toDTO() = DressCodeDTO(description, colorPaletteId)
 
 fun EventVenueDTO.toEntity() = EventVenue(name, locationLink)
 fun EventVenue.toDTO() = EventVenueDTO(name, locationLink)
