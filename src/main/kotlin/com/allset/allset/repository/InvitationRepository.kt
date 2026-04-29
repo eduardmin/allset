@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 interface InvitationRepository : MongoRepository<Invitation, String> {
     fun findAllByOwnerId(ownerId: String): List<Invitation>
     fun findAllByOwnerIdAndStatus(ownerId: String, status: InvitationStatus): List<Invitation>
-    fun findByUrlExtension(urlExtension: String): Invitation?
+    fun findAllByUrlExtension(urlExtension: String): List<Invitation>
     fun countByStatus(status: InvitationStatus): Long
     fun findAllByStatus(status: InvitationStatus): List<Invitation>
 }

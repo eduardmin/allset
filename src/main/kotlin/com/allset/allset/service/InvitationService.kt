@@ -24,6 +24,27 @@ class InvitationService(
     private val confirmationRepository: ConfirmationRepository
 ) {
 
+    fun generateUniqueUrl(title: Map<String, String>): String {
+        val base = (title["en"] ?: title.values.firstOrNull() ?: "invitation")
+            .lowercase()
+            .replace(Regex("[^a-z0-9\\s-]"), "")
+            .trim()
+            .replace(Regex("\\s+"), "-")
+            .replace(Regex("-+"), "-")
+            .take(60)
+            .trimEnd('-')
+            .ifEmpty { "invitation" }
+
+        if (invitationRepository.findAllByUrlExtension(base).isEmpty()) return base
+
+        var counter = 1
+        while (true) {
+            val candidate = "$base-$counter"
+            if (invitationRepository.findAllByUrlExtension(candidate).isEmpty()) return candidate
+            counter++
+        }
+    }
+
     // Create new draft
     fun saveDraft(invitation: Invitation): Invitation {
         val userId = authenticationService.getCurrentUserId()
@@ -36,8 +57,9 @@ class InvitationService(
         val invitationWithDefaults = applyDefaults(invitation)
 
         val invitationToSave = invitationWithDefaults.copy(
-            id = null, // Ensure new document
+            id = null,
             ownerId = userId,
+            urlExtension = generateUniqueUrl(invitation.title),
             status = InvitationStatus.DRAFT,
             createdAt = Instant.now(),
             lastModifiedAt = Instant.now()
@@ -220,6 +242,7 @@ class InvitationService(
         val invitationToSave = invitationWithDefaults.copy(
             id = null,
             ownerId = userId,
+            urlExtension = generateUniqueUrl(invitation.title),
             status = InvitationStatus.ACTIVE,
             publishedAt = publishedAt,
             expiresAt = expiresAt,
@@ -274,7 +297,9 @@ class InvitationService(
     }
 
     fun getInvitationByUrlExtension(urlExtension: String): Invitation? {
-        return invitationRepository.findByUrlExtension(urlExtension)
+        val results = invitationRepository.findAllByUrlExtension(urlExtension)
+        return results.firstOrNull { it.status == InvitationStatus.ACTIVE }
+            ?: results.firstOrNull()
     }
 
     fun updateInvitation(id: String, updatedInvitation: Invitation): Invitation? {

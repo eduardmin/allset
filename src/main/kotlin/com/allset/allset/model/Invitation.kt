@@ -1,6 +1,7 @@
 package com.allset.allset.model
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigDecimal
 import java.time.Instant
@@ -11,7 +12,7 @@ data class Invitation(
     val templateId: String,
     val ownerId: String,
     val title: Map<String, String>,
-    val urlExtension: String,
+    @Indexed(unique = true) val urlExtension: String,
     val eventDate: String? = null,
     val description: Map<String, String>? = null,
     val mainImages: List<String>? = null,

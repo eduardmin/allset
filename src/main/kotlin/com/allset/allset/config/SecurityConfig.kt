@@ -64,6 +64,7 @@ class SecurityConfig(
                     "/confirmations/guest",
                     "/confirmations/filters",
                     "/confirmations/invitation/**",
+                    "/invitations/url/**",
                     "/payments/idram/result",
                     "/auth/login",
                     "/v3/api-docs/**",
