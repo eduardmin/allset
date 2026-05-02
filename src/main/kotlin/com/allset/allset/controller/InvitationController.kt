@@ -86,8 +86,9 @@ class InvitationController(
     }
 
     @GetMapping("/{id}")
-    fun getInvitationById(@PathVariable id: String): InvitationDTO? {
-        val invitation = invitationService.getInvitationById(id) ?: return null
+    fun getInvitationById(@PathVariable id: String): InvitationDTO {
+        val invitation = invitationService.getInvitationById(id)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found")
         val template = templateService.getTemplateById(invitation.templateId)
         return invitation.toDTO(template = template)
     }
@@ -99,8 +100,9 @@ class InvitationController(
     }
 
     @GetMapping("/url/{url}")
-    fun getInvitationByUrlExtension(@PathVariable url: String): InvitationDTO? {
-        val invitation = invitationService.getInvitationByUrlExtension(url) ?: return null
+    fun getInvitationByUrlExtension(@PathVariable url: String): InvitationDTO {
+        val invitation = invitationService.getInvitationByUrlExtension(url)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found")
         val template = templateService.getTemplateById(invitation.templateId)
         return invitation.toDTO(template = template)
     }

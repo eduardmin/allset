@@ -73,22 +73,25 @@ class InvitationService(
         val userId = authenticationService.getCurrentUserId()
         
         val existingDraft = invitationRepository.findById(id).orElseThrow {
-            IllegalArgumentException("Draft with id $id not found")
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Draft with id $id not found")
         }
 
         if (existingDraft.ownerId != userId) {
-            throw IllegalAccessException("Unauthorized to update this draft")
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized to update this draft")
         }
 
         if (existingDraft.status != InvitationStatus.DRAFT) {
-            throw IllegalStateException("Can only update drafts, not published invitations")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only update drafts, not published invitations")
         }
 
-        val merged = existingDraft.mergeWithPartialUpdate(patch).copy(
+        val merged = existingDraft.mergeWithPartialUpdate(patch)
+
+        val updatedUrl = if (patch.title != null) generateUniqueUrl(patch.title) else existingDraft.urlExtension
+
+        return invitationRepository.save(merged.copy(
+            urlExtension = updatedUrl,
             lastModifiedAt = Instant.now()
-        )
-        
-        return invitationRepository.save(merged)
+        ))
     }
 
     // Delete draft
@@ -96,15 +99,15 @@ class InvitationService(
         val userId = authenticationService.getCurrentUserId()
         
         val draft = invitationRepository.findById(id).orElseThrow {
-            IllegalArgumentException("Draft with id $id not found")
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Draft with id $id not found")
         }
 
         if (draft.ownerId != userId) {
-            throw IllegalAccessException("Unauthorized to delete this draft")
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized to delete this draft")
         }
 
         if (draft.status != InvitationStatus.DRAFT) {
-            throw IllegalStateException("Can only delete drafts, not published invitations")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only delete drafts, not published invitations")
         }
 
         invitationRepository.deleteById(id)
@@ -142,15 +145,15 @@ class InvitationService(
     fun publishDraft(id: String): Invitation {
         val userId = authenticationService.getCurrentUserId()
         val draft = invitationRepository.findById(id).orElseThrow {
-            IllegalArgumentException("Draft with id $id not found")
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Draft with id $id not found")
         }
 
         if (draft.ownerId != userId) {
-            throw IllegalAccessException("Unauthorized to publish this draft")
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized to publish this draft")
         }
 
         if (draft.status != InvitationStatus.DRAFT) {
-            throw IllegalStateException("Only drafts can be published")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only drafts can be published")
         }
 
         // Validate required fields before publishing
@@ -321,11 +324,11 @@ class InvitationService(
     fun patchInvitation(id: String, patch: PartialInvitationDTO): Invitation {
         val userId = authenticationService.getCurrentUserId()
         val existing = invitationRepository.findById(id).orElseThrow {
-            IllegalArgumentException("Invitation with id $id not found.")
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $id not found")
         }
 
         if (existing.ownerId != userId) {
-            throw IllegalAccessException("Unauthorized to modify this invitation.")
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized to modify this invitation")
         }
 
         val merged = existing.mergeWithPartialUpdate(patch).copy(
