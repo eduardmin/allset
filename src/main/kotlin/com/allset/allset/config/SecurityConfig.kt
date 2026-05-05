@@ -58,6 +58,8 @@ class SecurityConfig(
                     "/templates/**",
                     "/color-palettes",
                     "/color-palettes/**",
+                    "/dress-code-palettes",
+                    "/dress-code-palettes/**",
                     "/health",
                     "/home",
                     "/promo-codes/preview",

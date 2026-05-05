@@ -22,7 +22,8 @@ class AdminService(
     private val promoCodeRepository: PromoCodeRepository,
     private val messageSource: MessageSource,
     private val localizationProperties: LocalizationProperties,
-    private val invitationDefaultsService: InvitationDefaultsService
+    private val invitationDefaultsService: InvitationDefaultsService,
+    private val dressCodePaletteService: DressCodePaletteService
 ) {
 
     // ── Dashboard ──
@@ -217,4 +218,14 @@ class AdminService(
     fun resetTemplateDefaults(templateId: String) {
         invitationDefaultsService.resetTemplateDefaults(templateId)
     }
+
+    // ── Dress Code Palettes ──
+
+    fun getAllDressCodePalettes(): List<DressCodePalette> = dressCodePaletteService.getAll()
+
+    fun createDressCodePalette(palette: DressCodePalette): DressCodePalette = dressCodePaletteService.create(palette)
+
+    fun updateDressCodePalette(id: String, palette: DressCodePalette): DressCodePalette = dressCodePaletteService.update(id, palette)
+
+    fun deleteDressCodePalette(id: String) = dressCodePaletteService.delete(id)
 }

@@ -146,4 +146,29 @@ class AdminController(
     fun resetTemplateDefaults(@PathVariable templateId: String) {
         adminService.resetTemplateDefaults(templateId)
     }
+
+    // ── Dress Code Palettes ──
+
+    @GetMapping("/dress-code-palettes")
+    fun getAllDressCodePalettes(): List<DressCodePalette> {
+        return adminService.getAllDressCodePalettes()
+    }
+
+    @PostMapping("/dress-code-palettes")
+    fun createDressCodePalette(@RequestBody palette: DressCodePalette): DressCodePalette {
+        return adminService.createDressCodePalette(palette)
+    }
+
+    @PatchMapping("/dress-code-palettes/{id}")
+    fun updateDressCodePalette(
+        @PathVariable id: String,
+        @RequestBody palette: DressCodePalette
+    ): DressCodePalette {
+        return adminService.updateDressCodePalette(id, palette)
+    }
+
+    @DeleteMapping("/dress-code-palettes/{id}")
+    fun deleteDressCodePalette(@PathVariable id: String) {
+        adminService.deleteDressCodePalette(id)
+    }
 }
