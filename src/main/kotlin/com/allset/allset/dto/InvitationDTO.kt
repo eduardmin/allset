@@ -35,7 +35,8 @@ data class InvitationDTO(
 data class TimelineEventDTO(
     val time: String,
     val venueName: Map<String, String>,
-    val venueLocation: String? = null
+    val venueLocation: String? = null,
+    val venueKey: String? = null
 )
 
 data class ConnectWithUsDTO(
@@ -110,8 +111,8 @@ fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null) = Invi
     lastModifiedAt = lastModifiedAt
 )
 
-fun TimelineEventDTO.toEntity() = TimelineEvent(time, venueName, venueLocation)
-fun TimelineEvent.toDTO() = TimelineEventDTO(time, venueName, venueLocation)
+fun TimelineEventDTO.toEntity() = TimelineEvent(time, venueName, venueLocation, venueKey)
+fun TimelineEvent.toDTO() = TimelineEventDTO(time, venueName, venueLocation, venueKey)
 
 fun ConnectWithUsDTO.toEntity() = ConnectWithUs(name, phone, email)
 fun ConnectWithUs.toDTO() = ConnectWithUsDTO(name, phone, email)

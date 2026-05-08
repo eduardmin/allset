@@ -37,7 +37,8 @@ data class Invitation(
 data class TimelineEvent(
     val time: String,
     val venueName: Map<String, String>,
-    val venueLocation: String? = null
+    val venueLocation: String? = null,
+    val venueKey: String? = null
 )
 
 data class ConnectWithUs(
