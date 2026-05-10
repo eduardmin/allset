@@ -37,6 +37,9 @@ dependencies {
     // Force patched commons-lang3
     implementation("org.apache.commons:commons-lang3:3.18.0")
 
+    // Transliteration for URL slugs (Armenian, Cyrillic, etc. → Latin)
+    implementation("com.ibm.icu:icu4j:76.1")
+
     // AWS S3 SDK
     implementation(platform("software.amazon.awssdk:bom:2.25.16"))
     implementation("software.amazon.awssdk:s3")

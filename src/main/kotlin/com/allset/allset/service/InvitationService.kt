@@ -7,6 +7,7 @@ import com.allset.allset.model.InvitationStatus
 import com.allset.allset.repository.ConfirmationRepository
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.UserRepository
+import com.allset.allset.util.InvitationSlug
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -25,15 +26,7 @@ class InvitationService(
 ) {
 
     fun generateUniqueUrl(title: Map<String, String>): String {
-        val base = (title["en"] ?: title.values.firstOrNull() ?: "invitation")
-            .lowercase()
-            .replace(Regex("[^a-z0-9\\s-]"), "")
-            .trim()
-            .replace(Regex("\\s+"), "-")
-            .replace(Regex("-+"), "-")
-            .take(60)
-            .trimEnd('-')
-            .ifEmpty { "invitation" }
+        val base = InvitationSlug.baseSlugSegment(title)
 
         if (invitationRepository.findAllByUrlExtension(base).isEmpty()) return base
 
