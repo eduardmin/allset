@@ -149,12 +149,16 @@ class InvitationService(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only drafts can be published")
         }
 
+        // Always derive slug from current title so publish works after title-only edits (e.g. hy-only)
+        // and never fails validation for a stale or empty stored urlExtension.
+        val draftReady = draft.copy(urlExtension = generateUniqueUrl(draft.title))
+
         // Validate required fields before publishing
-        validateForPublishing(draft)
+        validateForPublishing(draftReady)
 
         val validTemplateIds = templateService.getTemplates().map { it.id }
-        if (draft.templateId !in validTemplateIds) {
-            throw IllegalArgumentException("Invalid templateId: ${draft.templateId}")
+        if (draftReady.templateId !in validTemplateIds) {
+            throw IllegalArgumentException("Invalid templateId: ${draftReady.templateId}")
         }
 
         // Get user to calculate final price
@@ -169,7 +173,7 @@ class InvitationService(
         val publishedAt = Instant.now()
         val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS) // 1 year after publish
 
-        val publishedInvitation = draft.copy(
+        val publishedInvitation = draftReady.copy(
             status = InvitationStatus.ACTIVE,
             publishedAt = publishedAt,
             expiresAt = expiresAt,
@@ -194,8 +198,9 @@ class InvitationService(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation is already ${invitation.status}")
         }
 
-        validateForPublishing(invitation)
-        return invitation
+        val invitationReady = invitation.copy(urlExtension = generateUniqueUrl(invitation.title))
+        validateForPublishing(invitationReady)
+        return invitationReady
     }
 
     private fun validateForPublishing(invitation: Invitation) {

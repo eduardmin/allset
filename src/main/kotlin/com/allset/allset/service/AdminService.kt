@@ -3,10 +3,7 @@ package com.allset.allset.service
 import com.allset.allset.config.LocalizationProperties
 import com.allset.allset.dto.*
 import com.allset.allset.model.*
-import com.allset.allset.repository.ConfirmationRepository
-import com.allset.allset.repository.InvitationRepository
-import com.allset.allset.repository.PromoCodeRepository
-import com.allset.allset.repository.UserRepository
+import com.allset.allset.repository.*
 import com.allset.allset.service.InvitationDefaultsService
 import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
@@ -23,7 +20,9 @@ class AdminService(
     private val messageSource: MessageSource,
     private val localizationProperties: LocalizationProperties,
     private val invitationDefaultsService: InvitationDefaultsService,
-    private val dressCodePaletteService: DressCodePaletteService
+    private val dressCodePaletteService: DressCodePaletteService,
+    private val faqRepository: FaqRepository,
+    private val feedbackRepository: FeedbackRepository
 ) {
 
     // ── Dashboard ──
@@ -228,4 +227,56 @@ class AdminService(
     fun updateDressCodePalette(id: String, palette: DressCodePalette): DressCodePalette = dressCodePaletteService.update(id, palette)
 
     fun deleteDressCodePalette(id: String) = dressCodePaletteService.delete(id)
+
+    // ── FAQ ──
+
+    fun getAllFaqs(): List<FaqItem> = faqRepository.findAllByOrderBySortOrderAsc()
+
+    fun getFaqById(id: String): FaqItem {
+        return faqRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "FAQ item not found.")
+        }
+    }
+
+    fun createFaq(faq: FaqItem): FaqItem = faqRepository.save(faq.copy(id = null))
+
+    fun updateFaq(id: String, faq: FaqItem): FaqItem {
+        faqRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "FAQ item not found.")
+        }
+        return faqRepository.save(faq.copy(id = id))
+    }
+
+    fun deleteFaq(id: String) {
+        val faq = faqRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "FAQ item not found.")
+        }
+        faqRepository.delete(faq)
+    }
+
+    // ── Feedback ──
+
+    fun getAllFeedbacks(): List<FeedbackItem> = feedbackRepository.findAll()
+
+    fun getFeedbackById(id: String): FeedbackItem {
+        return feedbackRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Feedback item not found.")
+        }
+    }
+
+    fun createFeedback(feedback: FeedbackItem): FeedbackItem = feedbackRepository.save(feedback.copy(id = null))
+
+    fun updateFeedback(id: String, feedback: FeedbackItem): FeedbackItem {
+        feedbackRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Feedback item not found.")
+        }
+        return feedbackRepository.save(feedback.copy(id = id))
+    }
+
+    fun deleteFeedback(id: String) {
+        val feedback = feedbackRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Feedback item not found.")
+        }
+        feedbackRepository.delete(feedback)
+    }
 }

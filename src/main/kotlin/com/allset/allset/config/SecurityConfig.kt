@@ -62,6 +62,8 @@ class SecurityConfig(
                     "/dress-code-palettes/**",
                     "/health",
                     "/home",
+                    "/faqs",
+                    "/feedbacks",
                     "/promo-codes/preview",
                     "/confirmations/guest",
                     "/confirmations/filters",

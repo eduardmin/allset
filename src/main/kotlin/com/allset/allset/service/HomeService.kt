@@ -2,6 +2,8 @@ package com.allset.allset.service
 
 import com.allset.allset.config.LocalizationProperties
 import com.allset.allset.model.*
+import com.allset.allset.repository.FaqRepository
+import com.allset.allset.repository.FeedbackRepository
 import org.springframework.context.MessageSource
 import org.springframework.stereotype.Service
 import java.util.*
@@ -10,7 +12,9 @@ import java.util.*
 class HomeService(
     private val messageSource: MessageSource,
     private val localizationProperties: LocalizationProperties,
-    private val s3Service: S3Service
+    private val s3Service: S3Service,
+    private val faqRepository: FaqRepository,
+    private val feedbackRepository: FeedbackRepository
 ) {
 
     companion object {
@@ -27,6 +31,30 @@ class HomeService(
     }
 
     private fun buildFaq(): List<FaqItem> {
+        val dbFaqs = faqRepository.findAllByOrderBySortOrderAsc()
+        if (dbFaqs.isNotEmpty()) return dbFaqs
+        return defaultFaqs()
+    }
+
+    private fun buildFeedbacks(): List<FeedbackItem> {
+        val dbFeedbacks = feedbackRepository.findAll()
+        if (dbFeedbacks.isNotEmpty()) return dbFeedbacks
+        return defaultFeedbacks()
+    }
+
+    fun getFaqs(): List<FaqItem> {
+        val dbFaqs = faqRepository.findAllByOrderBySortOrderAsc()
+        if (dbFaqs.isNotEmpty()) return dbFaqs
+        return defaultFaqs()
+    }
+
+    fun getFeedbacks(): List<FeedbackItem> {
+        val dbFeedbacks = feedbackRepository.findAll()
+        if (dbFeedbacks.isNotEmpty()) return dbFeedbacks
+        return defaultFeedbacks()
+    }
+
+    private fun defaultFaqs(): List<FaqItem> {
         return (1..FAQ_COUNT).map { index ->
             FaqItem(
                 question = getLocalizedMessages("faq.$index.question"),
@@ -35,7 +63,7 @@ class HomeService(
         }
     }
 
-    private fun buildFeedbacks(): List<FeedbackItem> {
+    private fun defaultFeedbacks(): List<FeedbackItem> {
         return (1..FEEDBACK_COUNT).map { index ->
             FeedbackItem(
                 name = getMessage("feedback.$index.name", "en"),

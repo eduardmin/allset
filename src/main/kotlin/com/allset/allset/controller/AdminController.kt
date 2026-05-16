@@ -171,4 +171,38 @@ class AdminController(
     fun deleteDressCodePalette(@PathVariable id: String) {
         adminService.deleteDressCodePalette(id)
     }
+
+    // ── FAQ ──
+
+    @GetMapping("/faqs")
+    fun getAllFaqs(): List<FaqItem> = adminService.getAllFaqs()
+
+    @GetMapping("/faqs/{id}")
+    fun getFaqById(@PathVariable id: String): FaqItem = adminService.getFaqById(id)
+
+    @PostMapping("/faqs")
+    fun createFaq(@RequestBody faq: FaqItem): FaqItem = adminService.createFaq(faq)
+
+    @PutMapping("/faqs/{id}")
+    fun updateFaq(@PathVariable id: String, @RequestBody faq: FaqItem): FaqItem = adminService.updateFaq(id, faq)
+
+    @DeleteMapping("/faqs/{id}")
+    fun deleteFaq(@PathVariable id: String) = adminService.deleteFaq(id)
+
+    // ── Feedback ──
+
+    @GetMapping("/feedbacks")
+    fun getAllFeedbacks(): List<FeedbackItem> = adminService.getAllFeedbacks()
+
+    @GetMapping("/feedbacks/{id}")
+    fun getFeedbackById(@PathVariable id: String): FeedbackItem = adminService.getFeedbackById(id)
+
+    @PostMapping("/feedbacks")
+    fun createFeedback(@RequestBody feedback: FeedbackItem): FeedbackItem = adminService.createFeedback(feedback)
+
+    @PutMapping("/feedbacks/{id}")
+    fun updateFeedback(@PathVariable id: String, @RequestBody feedback: FeedbackItem): FeedbackItem = adminService.updateFeedback(id, feedback)
+
+    @DeleteMapping("/feedbacks/{id}")
+    fun deleteFeedback(@PathVariable id: String) = adminService.deleteFeedback(id)
 }
