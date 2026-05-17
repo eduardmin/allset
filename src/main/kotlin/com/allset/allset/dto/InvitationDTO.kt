@@ -1,7 +1,6 @@
 package com.allset.allset.dto
 
 import com.allset.allset.model.*
-import java.math.BigDecimal
 import java.time.Instant
 
 data class InvitationDTO(
@@ -27,7 +26,7 @@ data class InvitationDTO(
     val createdAt: Instant? = null,
     val publishedAt: Instant? = null,
     val expiresAt: Instant? = null,
-    val finalPrice: BigDecimal? = null,
+    val pricing: PricingSummary? = null,
     val guestCount: Int? = null,
     val lastModifiedAt: Instant? = null
 )
@@ -79,7 +78,7 @@ fun InvitationDTO.toEntity(ownerId: String) = Invitation(
     ourStory = ourStory?.toEntity(),
     languages = languages,
     colorPaletteId = colorPaletteId,
-    finalPrice = finalPrice,
+    pricing = pricing,
     expiresAt = expiresAt
 )
 
@@ -106,7 +105,7 @@ fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null) = Invi
     createdAt = createdAt,
     publishedAt = publishedAt,
     expiresAt = expiresAt,
-    finalPrice = finalPrice,
+    pricing = pricing,
     guestCount = guestCount,
     lastModifiedAt = lastModifiedAt
 )

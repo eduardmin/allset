@@ -17,6 +17,7 @@ class AdminService(
     private val invitationRepository: InvitationRepository,
     private val confirmationRepository: ConfirmationRepository,
     private val promoCodeRepository: PromoCodeRepository,
+    private val promoCodeUsageRepository: PromoCodeUsageRepository,
     private val messageSource: MessageSource,
     private val localizationProperties: LocalizationProperties,
     private val invitationDefaultsService: InvitationDefaultsService,
@@ -162,6 +163,8 @@ class AdminService(
             code = request.code.uppercase(),
             discountType = request.discountType,
             discountValue = request.discountValue,
+            type = request.type,
+            businessName = request.businessName,
             active = request.active,
             startsAt = request.startsAt,
             expiresAt = request.expiresAt
@@ -177,6 +180,8 @@ class AdminService(
             code = request.code?.uppercase() ?: existing.code,
             discountType = request.discountType ?: existing.discountType,
             discountValue = request.discountValue ?: existing.discountValue,
+            type = request.type ?: existing.type,
+            businessName = request.businessName ?: existing.businessName,
             active = request.active ?: existing.active,
             startsAt = request.startsAt ?: existing.startsAt,
             expiresAt = request.expiresAt ?: existing.expiresAt
@@ -189,6 +194,21 @@ class AdminService(
             ResponseStatusException(HttpStatus.NOT_FOUND, "Promo code not found.")
         }
         promoCodeRepository.delete(promoCode)
+    }
+
+    fun getPromoCodesByType(type: PromoCodeType): List<PromoCode> {
+        return promoCodeRepository.findAllByType(type)
+    }
+
+    fun getPromoCodesByBusinessName(businessName: String): List<PromoCode> {
+        return promoCodeRepository.findAllByBusinessNameIgnoreCase(businessName)
+    }
+
+    fun getPromoCodeUsage(promoCodeId: String): List<PromoCodeUsage> {
+        promoCodeRepository.findById(promoCodeId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Promo code not found.")
+        }
+        return promoCodeUsageRepository.findAllByPromoCodeId(promoCodeId)
     }
 
     // ── Confirmations ──

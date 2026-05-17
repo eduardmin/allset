@@ -1,10 +1,9 @@
 package com.allset.allset.service
 
 import com.allset.allset.dto.PricingSummary
-import com.allset.allset.model.DiscountType
-import com.allset.allset.model.PromoCode
-import com.allset.allset.model.toAppliedPromoCode
+import com.allset.allset.model.*
 import com.allset.allset.repository.PromoCodeRepository
+import com.allset.allset.repository.PromoCodeUsageRepository
 import com.allset.allset.repository.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -15,12 +14,13 @@ import java.time.Instant
 @Service
 class PromoCodeService(
     private val promoCodeRepository: PromoCodeRepository,
+    private val promoCodeUsageRepository: PromoCodeUsageRepository,
     private val userService: UserService,
     private val userRepository: UserRepository,
     private val pricingService: PricingService
 ) {
 
-    fun applyPromoCodeToCurrentUser(code: String): PricingSummary {
+    fun applyPromoCodeToCurrentUser(code: String): AppliedPromoCode {
         val promoCode = findAndValidatePromoCode(code)
         val user = userService.getCurrentUser()
 
@@ -31,7 +31,15 @@ class PromoCodeService(
         val updatedUser = user.copy(appliedPromoCodes = updatedPromoCodes)
         userRepository.save(updatedUser)
 
-        return pricingService.summarize(updatedPromoCodes)
+        recordUsage(promoCode, user.id!!)
+
+        return appliedPromoCode
+    }
+
+    fun getActivePromoCodes(): List<AppliedPromoCode> {
+        val user = userService.getCurrentUser()
+        val now = Instant.now()
+        return user.appliedPromoCodes.filter { it.expiresAt == null || it.expiresAt.isAfter(now) }
     }
 
     fun previewPromoCode(code: String): PricingSummary {
@@ -48,6 +56,25 @@ class PromoCodeService(
         val updatedUser = user.copy(appliedPromoCodes = emptyList())
         userRepository.save(updatedUser)
         return pricingService.basePricing()
+    }
+
+    private fun recordUsage(promoCode: PromoCode, userId: String) {
+        promoCodeUsageRepository.save(
+            PromoCodeUsage(
+                promoCodeId = promoCode.id!!,
+                code = promoCode.code.uppercase(),
+                userId = userId,
+                businessName = promoCode.businessName
+            )
+        )
+
+        val updatedPromoCode = promoCode.copy(useCount = promoCode.useCount + 1)
+
+        if (promoCode.type == PromoCodeType.SINGLE_USE) {
+            promoCodeRepository.save(updatedPromoCode.copy(active = false))
+        } else {
+            promoCodeRepository.save(updatedPromoCode)
+        }
     }
 
     private fun findAndValidatePromoCode(rawCode: String): PromoCode {

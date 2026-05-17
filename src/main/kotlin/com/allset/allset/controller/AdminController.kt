@@ -88,13 +88,25 @@ class AdminController(
     // ── Promo Codes ──
 
     @GetMapping("/promo-codes")
-    fun getAllPromoCodes(): List<PromoCode> {
-        return adminService.getAllPromoCodes()
+    fun getAllPromoCodes(
+        @RequestParam(required = false) type: PromoCodeType?,
+        @RequestParam(required = false) businessName: String?
+    ): List<PromoCode> {
+        return when {
+            type != null -> adminService.getPromoCodesByType(type)
+            businessName != null -> adminService.getPromoCodesByBusinessName(businessName)
+            else -> adminService.getAllPromoCodes()
+        }
     }
 
     @GetMapping("/promo-codes/{id}")
     fun getPromoCodeById(@PathVariable id: String): PromoCode {
         return adminService.getPromoCodeById(id)
+    }
+
+    @GetMapping("/promo-codes/{id}/usage")
+    fun getPromoCodeUsage(@PathVariable id: String): List<PromoCodeUsage> {
+        return adminService.getPromoCodeUsage(id)
     }
 
     @PostMapping("/promo-codes")

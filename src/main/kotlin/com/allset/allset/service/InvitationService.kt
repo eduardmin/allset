@@ -166,18 +166,16 @@ class InvitationService(
             IllegalArgumentException("User with ID $userId not found.")
         }
 
-        // Calculate final price using pricing service
         val pricingSummary = pricingService.summarize(user.appliedPromoCodes)
-        val finalPrice = pricingSummary.finalPrice
 
         val publishedAt = Instant.now()
-        val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS) // 1 year after publish
+        val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)
 
         val publishedInvitation = draftReady.copy(
             status = InvitationStatus.ACTIVE,
             publishedAt = publishedAt,
             expiresAt = expiresAt,
-            finalPrice = finalPrice,
+            pricing = pricingSummary,
             lastModifiedAt = Instant.now()
         )
 
@@ -233,12 +231,10 @@ class InvitationService(
         // Apply defaults for missing fields
         val invitationWithDefaults = applyDefaults(invitation)
 
-        // Calculate final price using pricing service
         val pricingSummary = pricingService.summarize(user.appliedPromoCodes)
-        val finalPrice = pricingSummary.finalPrice
 
         val publishedAt = Instant.now()
-        val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS) // 1 year after publish
+        val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)
 
         val invitationToSave = invitationWithDefaults.copy(
             id = null,
@@ -247,7 +243,7 @@ class InvitationService(
             status = InvitationStatus.ACTIVE,
             publishedAt = publishedAt,
             expiresAt = expiresAt,
-            finalPrice = finalPrice
+            pricing = pricingSummary
         )
         return invitationRepository.save(invitationToSave)
     }

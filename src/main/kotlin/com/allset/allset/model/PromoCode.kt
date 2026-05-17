@@ -13,6 +13,9 @@ data class PromoCode(
     val code: String,
     val discountType: DiscountType,
     val discountValue: BigDecimal,
+    val type: PromoCodeType = PromoCodeType.GLOBAL,
+    val businessName: String = "allset",
+    val useCount: Int = 0,
     val active: Boolean = true,
     val startsAt: Instant? = null,
     val expiresAt: Instant? = null
@@ -25,6 +28,12 @@ data class AppliedPromoCode(
     val expiresAt: Instant? = null,
     val appliedAt: Instant = Instant.now()
 )
+
+enum class PromoCodeType {
+    SINGLE_USE,
+    GLOBAL,
+    BUSINESS
+}
 
 enum class DiscountType {
     PERCENTAGE,
