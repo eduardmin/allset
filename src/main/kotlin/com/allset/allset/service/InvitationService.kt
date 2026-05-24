@@ -182,6 +182,47 @@ class InvitationService(
         return invitationRepository.save(publishedInvitation)
     }
 
+    fun publishDraftAfterPayment(invitationId: String, userId: String): Invitation {
+        val draft = invitationRepository.findById(invitationId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Draft with id $invitationId not found")
+        }
+
+        if (draft.ownerId != userId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Payment user does not own this draft")
+        }
+
+        if (draft.status != InvitationStatus.DRAFT) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only drafts can be published")
+        }
+
+        val draftReady = draft.copy(urlExtension = generateUniqueUrl(draft.title))
+        validateForPublishing(draftReady)
+
+        val validTemplateIds = templateService.getTemplates().map { it.id }
+        if (draftReady.templateId !in validTemplateIds) {
+            throw IllegalArgumentException("Invalid templateId: ${draftReady.templateId}")
+        }
+
+        val user = userRepository.findById(userId).orElseThrow {
+            IllegalArgumentException("User with ID $userId not found.")
+        }
+
+        val pricingSummary = pricingService.summarize(user.appliedPromoCodes)
+
+        val publishedAt = Instant.now()
+        val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)
+
+        val publishedInvitation = draftReady.copy(
+            status = InvitationStatus.ACTIVE,
+            publishedAt = publishedAt,
+            expiresAt = expiresAt,
+            pricing = pricingSummary,
+            lastModifiedAt = Instant.now()
+        )
+
+        return invitationRepository.save(publishedInvitation)
+    }
+
     fun validateForPayment(invitationId: String): Invitation {
         val userId = authenticationService.getCurrentUserId()
         val invitation = invitationRepository.findById(invitationId).orElseThrow {

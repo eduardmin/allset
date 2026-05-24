@@ -77,9 +77,9 @@ class IdramService(
             return false
         }
 
-        val expectedAmount = payment.amount.toPlainString()
-        if (amount != expectedAmount) {
-            logger.warn("Pre-check failed: amount mismatch for billNo=$billNo (expected=$expectedAmount, received=$amount)")
+        val receivedAmount = BigDecimal(amount)
+        if (receivedAmount.compareTo(payment.amount) != 0) {
+            logger.warn("Pre-check failed: amount mismatch for billNo=$billNo (expected=${payment.amount}, received=$amount)")
             return false
         }
 
@@ -128,7 +128,7 @@ class IdramService(
 
         if (updated.invitationId != null) {
             try {
-                invitationService.publishDraft(updated.invitationId)
+                invitationService.publishDraftAfterPayment(updated.invitationId, updated.userId)
                 logger.info("Invitation auto-published after payment: invitationId=${updated.invitationId}")
             } catch (e: Exception) {
                 logger.error("Failed to auto-publish invitation after payment: invitationId=${updated.invitationId}", e)
