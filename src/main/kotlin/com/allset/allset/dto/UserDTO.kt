@@ -15,7 +15,8 @@ data class UserDTO(
     val status: String?,
     val role: UserRole,
     val lastSeenAt: Instant?,
-    val appliedPromoCodes: List<AppliedPromoCode>
+    val appliedPromoCodes: List<AppliedPromoCode>,
+    val referralCode: String
 )
 
 fun User.toDTO(): UserDTO = UserDTO(
@@ -28,7 +29,8 @@ fun User.toDTO(): UserDTO = UserDTO(
     status = this.status,
     role = this.role,
     lastSeenAt = this.lastSeenAt,
-    appliedPromoCodes = this.appliedPromoCodes
+    appliedPromoCodes = this.appliedPromoCodes,
+    referralCode = this.referralCode
 )
 
 fun UserDTO.toEntity(existing: User): User = existing.copy(

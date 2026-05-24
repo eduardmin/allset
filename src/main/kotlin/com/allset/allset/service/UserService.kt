@@ -1,9 +1,7 @@
 package com.allset.allset.service
 
 import com.allset.allset.dto.UpdateUserRequest
-import com.allset.allset.model.Invitation
-import com.allset.allset.model.User
-import com.allset.allset.model.Confirmation
+import com.allset.allset.model.*
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.UserRepository
 import com.allset.allset.repository.ConfirmationRepository
@@ -37,7 +35,11 @@ class UserService(
         val existingUser = userRepository.findByEmail(email)
         return if (existingUser != null) {
             logger.info("✅ User already exists: ${existingUser.email}")
-            existingUser
+            if (existingUser.referralCode.isBlank()) {
+                userRepository.save(existingUser.copy(referralCode = generateReferralCode()))
+            } else {
+                existingUser
+            }
         } else {
             val newUser = User(email = email, name = name, picture = picture)
             val savedUser = userRepository.save(newUser)

@@ -17,7 +17,9 @@ data class AdminUserResponse(
     val role: UserRole,
     val lastSeenAt: Instant?,
     val invitationCount: Int,
-    val appliedPromoCodes: List<AppliedPromoCode>
+    val appliedPromoCodes: List<AppliedPromoCode>,
+    val referralCode: String,
+    val referredBy: String?
 )
 
 fun User.toAdminResponse(invitationCount: Int) = AdminUserResponse(
@@ -32,5 +34,7 @@ fun User.toAdminResponse(invitationCount: Int) = AdminUserResponse(
     role = this.role,
     lastSeenAt = this.lastSeenAt,
     invitationCount = invitationCount,
-    appliedPromoCodes = this.appliedPromoCodes
+    appliedPromoCodes = this.appliedPromoCodes,
+    referralCode = this.referralCode,
+    referredBy = this.referredBy
 )

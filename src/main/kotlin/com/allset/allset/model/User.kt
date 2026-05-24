@@ -1,6 +1,7 @@
 package com.allset.allset.model
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.Instant
@@ -20,6 +21,9 @@ data class User(
     val status: String? = null,
     @Field("role")
     val role: UserRole = UserRole.USER,
+    @Indexed(unique = true)
+    val referralCode: String = generateReferralCode(),
+    val referredBy: String? = null,
     val lastSeenAt: Instant? = null
 )
 
@@ -27,3 +31,8 @@ enum class UserRole {
     USER,
     ADMIN
 }
+
+private val REFERRAL_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+fun generateReferralCode(length: Int = 7): String =
+    (1..length).map { REFERRAL_CHARS.random() }.joinToString("")

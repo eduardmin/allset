@@ -18,6 +18,7 @@ class AdminService(
     private val confirmationRepository: ConfirmationRepository,
     private val promoCodeRepository: PromoCodeRepository,
     private val promoCodeUsageRepository: PromoCodeUsageRepository,
+    private val referralRepository: ReferralRepository,
     private val messageSource: MessageSource,
     private val localizationProperties: LocalizationProperties,
     private val invitationDefaultsService: InvitationDefaultsService,
@@ -209,6 +210,16 @@ class AdminService(
             ResponseStatusException(HttpStatus.NOT_FOUND, "Promo code not found.")
         }
         return promoCodeUsageRepository.findAllByPromoCodeId(promoCodeId)
+    }
+
+    // ── Referrals ──
+
+    fun getAllReferrals(referralCode: String?): List<Referral> {
+        return if (referralCode != null) {
+            referralRepository.findAllByReferralCode(referralCode)
+        } else {
+            referralRepository.findAll()
+        }
     }
 
     // ── Confirmations ──

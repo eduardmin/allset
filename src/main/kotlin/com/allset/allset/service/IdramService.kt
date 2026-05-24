@@ -18,7 +18,8 @@ class IdramService(
     private val paymentRepository: PaymentRepository,
     private val idramProperties: IdramProperties,
     private val authenticationService: AuthenticationService,
-    private val invitationService: InvitationService
+    private val invitationService: InvitationService,
+    private val referralService: ReferralService
 ) {
     private val logger = LoggerFactory.getLogger(IdramService::class.java)
 
@@ -132,6 +133,12 @@ class IdramService(
             } catch (e: Exception) {
                 logger.error("Failed to auto-publish invitation after payment: invitationId=${updated.invitationId}", e)
             }
+        }
+
+        try {
+            referralService.rewardReferrerForPayment(updated.userId)
+        } catch (e: Exception) {
+            logger.error("Failed to process referral reward for userId=${updated.userId}", e)
         }
 
         return true

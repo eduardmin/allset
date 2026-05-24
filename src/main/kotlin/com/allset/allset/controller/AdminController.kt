@@ -127,6 +127,15 @@ class AdminController(
         adminService.deletePromoCode(id)
     }
 
+    // ── Referrals ──
+
+    @GetMapping("/referrals")
+    fun getAllReferrals(
+        @RequestParam(required = false) referralCode: String?
+    ): List<Referral> {
+        return adminService.getAllReferrals(referralCode)
+    }
+
     // ── Confirmations ──
 
     @GetMapping("/confirmations")

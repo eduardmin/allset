@@ -7,3 +7,6 @@ data class UpdateUserRequest(
     val dateOfBirth: String? = null,
     val status: String? = null
 )
+
+data class ReferralRequest(val referralCode: String)
+
