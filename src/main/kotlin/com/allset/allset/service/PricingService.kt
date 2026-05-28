@@ -17,8 +17,8 @@ class PricingService(
     private val random: Random = Random.Default
 ) {
 
-    fun summarize(appliedPromoCode: AppliedPromoCode?): PricingSummary {
-        val basePrice = pricingProperties.basePrice.setScale(2, RoundingMode.HALF_UP)
+    fun summarize(appliedPromoCode: AppliedPromoCode?, templateBasePrice: BigDecimal? = null): PricingSummary {
+        val basePrice = (templateBasePrice ?: pricingProperties.basePrice).setScale(2, RoundingMode.HALF_UP)
         val discountAmount = appliedPromoCode?.let { calculateDiscount(basePrice, it.discountType, it.discountValue) }
             ?: BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP)
         val finalPrice = basePrice.subtract(discountAmount).coerceAtLeast(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP)
@@ -31,8 +31,8 @@ class PricingService(
         )
     }
 
-    fun summarize(appliedPromoCodes: Collection<AppliedPromoCode>): PricingSummary {
-        val basePrice = pricingProperties.basePrice.setScale(2, RoundingMode.HALF_UP)
+    fun summarize(appliedPromoCodes: Collection<AppliedPromoCode>, templateBasePrice: BigDecimal? = null): PricingSummary {
+        val basePrice = (templateBasePrice ?: pricingProperties.basePrice).setScale(2, RoundingMode.HALF_UP)
         val selectedPromoCode = appliedPromoCodes
             .takeUnless { it.isEmpty() }
             ?.let { selectBestPromoCode(basePrice, it) }
@@ -49,11 +49,11 @@ class PricingService(
         )
     }
 
-    fun summarize(promoCode: PromoCode): PricingSummary {
-        return summarize(promoCode.toAppliedPromoCode())
+    fun summarize(promoCode: PromoCode, templateBasePrice: BigDecimal? = null): PricingSummary {
+        return summarize(promoCode.toAppliedPromoCode(), templateBasePrice)
     }
 
-    fun basePricing(): PricingSummary = summarize(null)
+    fun basePricing(templateBasePrice: BigDecimal? = null): PricingSummary = summarize(null, templateBasePrice)
 
     private fun calculateDiscount(basePrice: BigDecimal, discountType: DiscountType, discountValue: BigDecimal): BigDecimal {
         val normalizedDiscount = when (discountType) {

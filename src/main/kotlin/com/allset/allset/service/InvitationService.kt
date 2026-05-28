@@ -161,12 +161,12 @@ class InvitationService(
             throw IllegalArgumentException("Invalid templateId: ${draftReady.templateId}")
         }
 
-        // Get user to calculate final price
         val user = userRepository.findById(userId).orElseThrow {
             IllegalArgumentException("User with ID $userId not found.")
         }
 
-        val pricingSummary = pricingService.summarize(user.appliedPromoCodes)
+        val templateBasePrice = templateService.getBasePriceForTemplate(draftReady.templateId)
+        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
 
         val publishedAt = Instant.now()
         val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)
@@ -207,7 +207,8 @@ class InvitationService(
             IllegalArgumentException("User with ID $userId not found.")
         }
 
-        val pricingSummary = pricingService.summarize(user.appliedPromoCodes)
+        val templateBasePrice = templateService.getBasePriceForTemplate(draftReady.templateId)
+        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
 
         val publishedAt = Instant.now()
         val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)
@@ -272,7 +273,8 @@ class InvitationService(
         // Apply defaults for missing fields
         val invitationWithDefaults = applyDefaults(invitation)
 
-        val pricingSummary = pricingService.summarize(user.appliedPromoCodes)
+        val templateBasePrice = templateService.getBasePriceForTemplate(invitation.templateId)
+        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
 
         val publishedAt = Instant.now()
         val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)

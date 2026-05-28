@@ -2,11 +2,13 @@ package com.allset.allset.service
 
 import com.allset.allset.config.LocalizationProperties
 import com.allset.allset.dto.PricingSummary
+import com.allset.allset.model.AppliedPromoCode
 import com.allset.allset.model.Template
 import com.allset.allset.model.TemplateDefaults
 import com.allset.allset.model.TemplateType
 import org.springframework.context.MessageSource
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.util.*
 
 @Service
@@ -28,9 +30,19 @@ class TemplateService(
         return getTemplates().find { it.id == id }
     }
 
+    private val templatePrices = mapOf(
+        "template.rustic.love.story" to BigDecimal("18000"),
+        "template.modern.romance" to BigDecimal("15000"),
+        "template.classic.elegance" to BigDecimal("12000")
+    )
+
+    fun getBasePriceForTemplate(templateId: String): BigDecimal {
+        return templatePrices[templateId]
+            ?: throw IllegalArgumentException("Unknown template: $templateId")
+    }
+
     fun getTemplates(): List<Template> {
         val appliedPromoCodes = userService.getCurrentUserOrNull()?.appliedPromoCodes ?: emptyList()
-        val pricingSummary = pricingService.summarize(appliedPromoCodes)
 
         return listOf(
             buildTemplate(
@@ -41,7 +53,7 @@ class TemplateService(
                 mainImageMaxCount = 4,
                 albumImageMaxCount = 4,
                 paletteIds = listOf("warm_linen", "dusty_lilac", "muted_sage", "copper_dusk"),
-                pricingSummary = pricingSummary
+                appliedPromoCodes = appliedPromoCodes
             ),
             buildTemplate(
                 id = "template.modern.romance",
@@ -54,7 +66,7 @@ class TemplateService(
                     "sage_garden", "rosewood", "coastal_mist",
                     "terracotta_sun", "midnight_bloom", "velvet_plum"
                 ),
-                pricingSummary = pricingSummary
+                appliedPromoCodes = appliedPromoCodes
             ),
             buildTemplate(
                 id = "template.classic.elegance",
@@ -67,7 +79,7 @@ class TemplateService(
                     "charcoal_noir", "bordeaux", "midnight_navy", "forest_night",
                     "blossom_pink", "aqua_dream", "honey_dew"
                 ),
-                pricingSummary = pricingSummary
+                appliedPromoCodes = appliedPromoCodes
             ),
         )
     }
@@ -80,8 +92,10 @@ class TemplateService(
         mainImageMaxCount: Int,
         albumImageMaxCount: Int,
         paletteIds: List<String>,
-        pricingSummary: PricingSummary
+        appliedPromoCodes: List<AppliedPromoCode>
     ): Template {
+        val templateBasePrice = getBasePriceForTemplate(id)
+        val pricingSummary = pricingService.summarize(appliedPromoCodes, templateBasePrice)
         val defaults = buildDefaults(id)
         return Template(
             id = id,
@@ -93,7 +107,7 @@ class TemplateService(
             mainImageMaxCount = mainImageMaxCount,
             albumImageMaxCount = albumImageMaxCount,
             palettes = colorPaletteService.getByIds(paletteIds),
-            pricing = pricingSummary.copy(),
+            pricing = pricingSummary,
             styleKeyword = getLocalizedMessages("$id.keywords.style"),
             lovedByKeyword = getLocalizedMessages("$id.keywords.lovedBy"),
             createdByKeyword = getLocalizedMessages("$id.keywords.createdBy"),
