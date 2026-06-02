@@ -1,11 +1,15 @@
 package com.allset.allset.service
 
 import com.allset.allset.config.LocalizationProperties
-import com.allset.allset.dto.PricingSummary
+import com.allset.allset.config.PricingProperties
 import com.allset.allset.model.AppliedPromoCode
 import com.allset.allset.model.Template
 import com.allset.allset.model.TemplateDefaults
 import com.allset.allset.model.TemplateType
+import com.allset.allset.model.TemplatePricing
+import com.allset.allset.repository.TemplatePricingRepository
+import jakarta.annotation.PostConstruct
+import org.slf4j.LoggerFactory
 import org.springframework.context.MessageSource
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -19,8 +23,28 @@ class TemplateService(
     private val userService: UserService,
     private val pricingService: PricingService,
     private val invitationDefaultsService: InvitationDefaultsService,
-    private val s3Service: S3Service
+    private val s3Service: S3Service,
+    private val templatePricingRepository: TemplatePricingRepository,
+    private val pricingProperties: PricingProperties
 ) {
+
+    private val logger = LoggerFactory.getLogger(TemplateService::class.java)
+
+    private val defaultPrices = mapOf(
+        "template.rustic.love.story" to BigDecimal("18000"),
+        "template.modern.romance" to BigDecimal("15000"),
+        "template.classic.elegance" to BigDecimal("12000")
+    )
+
+    @PostConstruct
+    fun seedDefaultPricing() {
+        defaultPrices.forEach { (templateId, price) ->
+            if (templatePricingRepository.findByTemplateId(templateId) == null) {
+                templatePricingRepository.save(TemplatePricing(templateId = templateId, basePrice = price))
+                logger.info("Seeded default pricing for $templateId: $price")
+            }
+        }
+    }
 
     fun getSupportedLanguages(): List<String> {
         return localizationProperties.supportedLanguages
@@ -30,15 +54,9 @@ class TemplateService(
         return getTemplates().find { it.id == id }
     }
 
-    private val templatePrices = mapOf(
-        "template.rustic.love.story" to BigDecimal("18000"),
-        "template.modern.romance" to BigDecimal("15000"),
-        "template.classic.elegance" to BigDecimal("12000")
-    )
-
     fun getBasePriceForTemplate(templateId: String): BigDecimal {
-        return templatePrices[templateId]
-            ?: throw IllegalArgumentException("Unknown template: $templateId")
+        return templatePricingRepository.findByTemplateId(templateId)?.basePrice
+            ?: pricingProperties.basePrice
     }
 
     fun getTemplates(): List<Template> {

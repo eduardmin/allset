@@ -148,6 +148,23 @@ class AdminController(
         adminService.deleteConfirmation(id)
     }
 
+    // ── Template Pricing ──
+
+    @GetMapping("/templates/pricing")
+    fun getAllTemplatePricing(): List<TemplatePricing> {
+        return adminService.getAllTemplatePricing()
+    }
+
+    @PutMapping("/templates/{templateId}/pricing")
+    fun updateTemplatePricing(
+        @PathVariable templateId: String,
+        @RequestBody body: Map<String, java.math.BigDecimal>
+    ): TemplatePricing {
+        val basePrice = body["basePrice"]
+            ?: throw IllegalArgumentException("basePrice is required")
+        return adminService.updateTemplatePricing(templateId, basePrice)
+    }
+
     // ── Template Defaults ──
 
     @GetMapping("/templates/{templateId}/defaults")

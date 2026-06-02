@@ -19,6 +19,7 @@ class AdminService(
     private val promoCodeRepository: PromoCodeRepository,
     private val promoCodeUsageRepository: PromoCodeUsageRepository,
     private val referralRepository: ReferralRepository,
+    private val templatePricingRepository: TemplatePricingRepository,
     private val messageSource: MessageSource,
     private val localizationProperties: LocalizationProperties,
     private val invitationDefaultsService: InvitationDefaultsService,
@@ -247,6 +248,19 @@ class AdminService(
 
     fun resetTemplateDefaults(templateId: String) {
         invitationDefaultsService.resetTemplateDefaults(templateId)
+    }
+
+    // ── Template Pricing ──
+
+    fun getAllTemplatePricing(): List<TemplatePricing> {
+        return templatePricingRepository.findAll()
+    }
+
+    fun updateTemplatePricing(templateId: String, basePrice: java.math.BigDecimal): TemplatePricing {
+        val existing = templatePricingRepository.findByTemplateId(templateId)
+        val pricing = existing?.copy(basePrice = basePrice)
+            ?: TemplatePricing(templateId = templateId, basePrice = basePrice)
+        return templatePricingRepository.save(pricing)
     }
 
     // ── Dress Code Palettes ──
