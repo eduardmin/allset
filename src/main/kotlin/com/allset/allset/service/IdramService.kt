@@ -1,8 +1,11 @@
 package com.allset.allset.service
 
 import com.allset.allset.config.IdramProperties
+import com.allset.allset.dto.PricingSummary
+import com.allset.allset.model.InvitationStatus
 import com.allset.allset.model.Payment
 import com.allset.allset.model.PaymentStatus
+import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.PaymentRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -19,7 +22,11 @@ class IdramService(
     private val idramProperties: IdramProperties,
     private val authenticationService: AuthenticationService,
     private val invitationService: InvitationService,
-    private val referralService: ReferralService
+    private val referralService: ReferralService,
+    private val templateService: TemplateService,
+    private val pricingService: PricingService,
+    private val userRepository: com.allset.allset.repository.UserRepository,
+    private val invitationRepository: InvitationRepository
 ) {
     private val logger = LoggerFactory.getLogger(IdramService::class.java)
 
@@ -32,10 +39,17 @@ class IdramService(
         val edpBillNo: String
     )
 
-    fun initiatePayment(invitationId: String, amount: BigDecimal, language: String): PaymentFormData {
+    fun initiatePayment(invitationId: String, language: String): PaymentFormData {
         val userId = authenticationService.getCurrentUserId()
 
-        invitationService.validateForPayment(invitationId)
+        val invitation = invitationService.validateForPayment(invitationId)
+
+        val user = userRepository.findById(userId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+        }
+        val templateBasePrice = templateService.getBasePriceForTemplate(invitation.templateId)
+        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
+        val amount = pricingSummary.finalPrice
 
         val billNo = "ALLSET-${UUID.randomUUID().toString().take(12).uppercase()}"
 
@@ -142,6 +156,48 @@ class IdramService(
         }
 
         return true
+    }
+
+    data class PaymentSummary(
+        val billNo: String,
+        val paymentStatus: PaymentStatus,
+        val amount: BigDecimal,
+        val transactionId: String?,
+        val paidAt: Instant?,
+        val pricing: PricingSummary?,
+        val invitationId: String?,
+        val invitationStatus: InvitationStatus?,
+        val invitationTitle: Map<String, String>?,
+        val templateId: String?,
+        val publishedAt: Instant?,
+        val expiresAt: Instant?,
+        val invitationUrl: String?
+    )
+
+    fun getLastPaymentSummary(): PaymentSummary {
+        val userId = authenticationService.getCurrentUserId()
+        val payment = paymentRepository.findFirstByUserIdAndStatusOrderByCompletedAtDesc(userId, PaymentStatus.COMPLETED)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No completed payment found")
+
+        val invitation = payment.invitationId?.let {
+            invitationRepository.findById(it).orElse(null)
+        }
+
+        return PaymentSummary(
+            billNo = payment.billNo,
+            paymentStatus = payment.status,
+            amount = payment.amount,
+            transactionId = payment.transactionId,
+            paidAt = payment.completedAt,
+            pricing = invitation?.pricing,
+            invitationId = invitation?.id,
+            invitationStatus = invitation?.status,
+            invitationTitle = invitation?.title,
+            templateId = invitation?.templateId,
+            publishedAt = invitation?.publishedAt,
+            expiresAt = invitation?.expiresAt,
+            invitationUrl = invitation?.urlExtension?.let { "https://allset.am/invitation/$it" }
+        )
     }
 
     fun getPaymentsByUser(): List<Payment> {

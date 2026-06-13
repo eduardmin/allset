@@ -24,6 +24,7 @@ data class User(
     @Indexed(unique = true)
     val referralCode: String = generateReferralCode(),
     val referredBy: String? = null,
+    val marketingOptIn: Boolean = false,
     val lastSeenAt: Instant? = null
 )
 

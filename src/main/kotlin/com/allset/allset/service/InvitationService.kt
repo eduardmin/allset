@@ -42,22 +42,25 @@ class InvitationService(
     fun saveDraft(invitation: Invitation): Invitation {
         val userId = authenticationService.getCurrentUserId()
 
-        userRepository.findById(userId).orElseThrow {
+        val user = userRepository.findById(userId).orElseThrow {
             IllegalArgumentException("User with ID $userId not found.")
         }
 
-        // Apply defaults for missing fields
         val invitationWithDefaults = applyDefaults(invitation)
+
+        val templateBasePrice = templateService.getBasePriceForTemplate(invitation.templateId)
+        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
 
         val invitationToSave = invitationWithDefaults.copy(
             id = null,
             ownerId = userId,
             urlExtension = generateUniqueUrl(invitation.title),
             status = InvitationStatus.DRAFT,
+            pricing = pricingSummary,
             createdAt = Instant.now(),
             lastModifiedAt = Instant.now()
         )
-        
+
         return invitationRepository.save(invitationToSave)
     }
 
@@ -347,10 +350,17 @@ class InvitationService(
         val existingInvitation = invitationRepository.findById(id).orElse(null)
 
         return if (existingInvitation != null && existingInvitation.ownerId == userId) {
+            val user = userRepository.findById(userId).orElseThrow {
+                IllegalArgumentException("User with ID $userId not found.")
+            }
             val invitationWithDefaults = applyDefaults(updatedInvitation)
+            val templateBasePrice = templateService.getBasePriceForTemplate(updatedInvitation.templateId)
+            val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
+
             invitationRepository.save(invitationWithDefaults.copy(
-                id = id, 
+                id = id,
                 ownerId = userId,
+                pricing = pricingSummary,
                 lastModifiedAt = Instant.now()
             ))
         } else {

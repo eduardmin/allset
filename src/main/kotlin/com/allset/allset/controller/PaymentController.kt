@@ -5,11 +5,9 @@ import com.allset.allset.service.IdramService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.math.BigDecimal
 
 data class InitiatePaymentRequest(
     val invitationId: String,
-    val amount: BigDecimal,
     val language: String = "EN"
 )
 
@@ -22,7 +20,7 @@ class PaymentController(
 
     @PostMapping("/idram/initiate")
     fun initiatePayment(@RequestBody request: InitiatePaymentRequest): IdramService.PaymentFormData {
-        return idramService.initiatePayment(request.invitationId, request.amount, request.language)
+        return idramService.initiatePayment(request.invitationId, request.language)
     }
 
     @PostMapping("/idram/result")
@@ -55,6 +53,11 @@ class PaymentController(
         } else {
             ResponseEntity.badRequest().body("FAILED")
         }
+    }
+
+    @GetMapping("/last-summary")
+    fun getLastPaymentSummary(): IdramService.PaymentSummary {
+        return idramService.getLastPaymentSummary()
     }
 
     @GetMapping("/my")

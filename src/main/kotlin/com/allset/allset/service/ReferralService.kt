@@ -40,14 +40,31 @@ class ReferralService(
 
         userRepository.save(currentUser.copy(referredBy = referralCode))
 
+        val rewardCode = "REF-REWARD-${UUID.randomUUID().toString().take(8).uppercase()}"
+        val promoCode = PromoCode(
+            code = rewardCode,
+            discountType = DiscountType.PERCENTAGE,
+            discountValue = BigDecimal(10),
+            type = PromoCodeType.SINGLE_USE,
+            businessName = "allset-referral"
+        )
+        val savedPromo = promoCodeRepository.save(promoCode)
+
+        val appliedPromo = savedPromo.toAppliedPromoCode()
+        val updatedPromoCodes = referrer.appliedPromoCodes.plus(appliedPromo)
+        userRepository.save(referrer.copy(appliedPromoCodes = updatedPromoCodes))
+
         val referral = Referral(
             referrerUserId = referrer.id!!,
             referredUserId = currentUserId,
-            referralCode = referralCode
+            referralCode = referralCode,
+            status = ReferralStatus.REWARDED,
+            rewardPromoCodeId = savedPromo.id,
+            rewardedAt = Instant.now()
         )
         val saved = referralRepository.save(referral)
 
-        logger.info("Referral registered: referrer=${referrer.id}, referred=$currentUserId, code=$referralCode")
+        logger.info("Referral registered and rewarded: referrer=${referrer.id}, referred=$currentUserId, code=$referralCode, rewardCode=$rewardCode")
         return saved
     }
 
@@ -68,7 +85,7 @@ class ReferralService(
         val promoCode = PromoCode(
             code = rewardCode,
             discountType = DiscountType.PERCENTAGE,
-            discountValue = BigDecimal(5),
+            discountValue = BigDecimal(10),
             type = PromoCodeType.SINGLE_USE,
             businessName = "allset-referral"
         )

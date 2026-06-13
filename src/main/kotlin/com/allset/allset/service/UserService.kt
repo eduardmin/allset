@@ -93,7 +93,8 @@ class UserService(
             picture = updateRequest.picture?.also { updatedFields["picture"] = it } ?: existingUser.picture,
             phoneNumber = updateRequest.phoneNumber?.also { updatedFields["phoneNumber"] = it } ?: existingUser.phoneNumber,
             dateOfBirth = updateRequest.dateOfBirth?.also { updatedFields["dateOfBirth"] = it } ?: existingUser.dateOfBirth,
-            status = updateRequest.status?.also { updatedFields["status"] = it } ?: existingUser.status
+            status = updateRequest.status?.also { updatedFields["status"] = it } ?: existingUser.status,
+            marketingOptIn = updateRequest.marketingOptIn?.also { updatedFields["marketingOptIn"] = it } ?: existingUser.marketingOptIn
         )
 
         userRepository.save(userToUpdate)

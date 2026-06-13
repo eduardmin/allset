@@ -5,7 +5,8 @@ data class UpdateUserRequest(
     val picture: String? = null,
     val phoneNumber: String? = null,
     val dateOfBirth: String? = null,
-    val status: String? = null
+    val status: String? = null,
+    val marketingOptIn: Boolean? = null
 )
 
 data class ReferralRequest(val referralCode: String)
