@@ -25,7 +25,9 @@ class AdminService(
     private val invitationDefaultsService: InvitationDefaultsService,
     private val dressCodePaletteService: DressCodePaletteService,
     private val faqRepository: FaqRepository,
-    private val feedbackRepository: FeedbackRepository
+    private val feedbackRepository: FeedbackRepository,
+    private val vendorRepository: VendorRepository,
+    private val vendorCategoryRepository: VendorCategoryRepository
 ) {
 
     // ── Dashboard ──
@@ -323,5 +325,82 @@ class AdminService(
             ResponseStatusException(HttpStatus.NOT_FOUND, "Feedback item not found.")
         }
         feedbackRepository.delete(feedback)
+    }
+
+    // ── Vendor Categories ──
+
+    fun getAllVendorCategories(): List<VendorCategory> = vendorCategoryRepository.findAll()
+
+    fun getVendorCategoryById(id: String): VendorCategory {
+        return vendorCategoryRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor category not found.")
+        }
+    }
+
+    fun createVendorCategory(category: VendorCategory): VendorCategory {
+        val existing = vendorCategoryRepository.findBySlug(category.slug)
+        if (existing != null) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Category slug '${category.slug}' already exists.")
+        }
+        return vendorCategoryRepository.save(category.copy(id = null))
+    }
+
+    fun updateVendorCategory(id: String, category: VendorCategory): VendorCategory {
+        vendorCategoryRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor category not found.")
+        }
+        return vendorCategoryRepository.save(category.copy(id = id))
+    }
+
+    fun deleteVendorCategory(id: String) {
+        val category = vendorCategoryRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor category not found.")
+        }
+        vendorCategoryRepository.delete(category)
+    }
+
+    // ── Vendors ──
+
+    fun getAllVendors(categoryId: String?): List<Vendor> {
+        return if (categoryId != null) {
+            vendorRepository.findAllByCategoryId(categoryId)
+        } else {
+            vendorRepository.findAll()
+        }
+    }
+
+    fun getVendorById(id: String): Vendor {
+        return vendorRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor not found.")
+        }
+    }
+
+    fun createVendor(vendor: Vendor): Vendor {
+        val existing = vendorRepository.findBySlug(vendor.slug)
+        if (existing != null) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Vendor slug '${vendor.slug}' already exists.")
+        }
+        return vendorRepository.save(vendor.copy(id = null))
+    }
+
+    fun updateVendor(id: String, vendor: Vendor): Vendor {
+        vendorRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor not found.")
+        }
+        return vendorRepository.save(vendor.copy(id = id))
+    }
+
+    fun updateVendorRating(id: String, rating: Double): Vendor {
+        val vendor = vendorRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor not found.")
+        }
+        return vendorRepository.save(vendor.copy(rating = rating))
+    }
+
+    fun deleteVendor(id: String) {
+        val vendor = vendorRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor not found.")
+        }
+        vendorRepository.delete(vendor)
     }
 }

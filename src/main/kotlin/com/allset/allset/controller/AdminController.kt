@@ -243,4 +243,48 @@ class AdminController(
 
     @DeleteMapping("/feedbacks/{id}")
     fun deleteFeedback(@PathVariable id: String) = adminService.deleteFeedback(id)
+
+    // ── Vendor Categories ──
+
+    @GetMapping("/vendor-categories")
+    fun getAllVendorCategories(): List<VendorCategory> = adminService.getAllVendorCategories()
+
+    @GetMapping("/vendor-categories/{id}")
+    fun getVendorCategoryById(@PathVariable id: String): VendorCategory = adminService.getVendorCategoryById(id)
+
+    @PostMapping("/vendor-categories")
+    fun createVendorCategory(@RequestBody category: VendorCategory): VendorCategory = adminService.createVendorCategory(category)
+
+    @PutMapping("/vendor-categories/{id}")
+    fun updateVendorCategory(@PathVariable id: String, @RequestBody category: VendorCategory): VendorCategory = adminService.updateVendorCategory(id, category)
+
+    @DeleteMapping("/vendor-categories/{id}")
+    fun deleteVendorCategory(@PathVariable id: String) = adminService.deleteVendorCategory(id)
+
+    // ── Vendors ──
+
+    @GetMapping("/vendors")
+    fun getAllVendors(@RequestParam(required = false) categoryId: String?): List<Vendor> = adminService.getAllVendors(categoryId)
+
+    @GetMapping("/vendors/{id}")
+    fun getVendorById(@PathVariable id: String): Vendor = adminService.getVendorById(id)
+
+    @PostMapping("/vendors")
+    fun createVendor(@RequestBody vendor: Vendor): Vendor = adminService.createVendor(vendor)
+
+    @PutMapping("/vendors/{id}")
+    fun updateVendor(@PathVariable id: String, @RequestBody vendor: Vendor): Vendor = adminService.updateVendor(id, vendor)
+
+    @PatchMapping("/vendors/{id}/rating")
+    fun updateVendorRating(
+        @PathVariable id: String,
+        @RequestBody body: Map<String, Double>
+    ): Vendor {
+        val rating = body["rating"]
+            ?: throw IllegalArgumentException("rating is required")
+        return adminService.updateVendorRating(id, rating)
+    }
+
+    @DeleteMapping("/vendors/{id}")
+    fun deleteVendor(@PathVariable id: String) = adminService.deleteVendor(id)
 }

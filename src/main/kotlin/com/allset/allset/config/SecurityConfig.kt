@@ -70,6 +70,8 @@ class SecurityConfig(
                     "/confirmations/invitation/**",
                     "/invitations/url/**",
                     "/payments/idram/result",
+                    "/vendors",
+                    "/vendors/**",
                     "/auth/login",
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
