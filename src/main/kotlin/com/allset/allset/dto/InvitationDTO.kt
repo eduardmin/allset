@@ -46,7 +46,8 @@ data class ConnectWithUsDTO(
 
 data class DressCodeDTO(
     val description: Map<String, String>,
-    val colorPaletteId: String? = null
+    val colorPaletteId: String? = null,
+    val colorPalette: DressCodePalette? = null
 )
 
 data class EventVenueDTO(
@@ -82,7 +83,7 @@ fun InvitationDTO.toEntity(ownerId: String) = Invitation(
     expiresAt = expiresAt
 )
 
-fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null) = InvitationDTO(
+fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null, dressCodePalette: DressCodePalette? = null) = InvitationDTO(
     id = id,
     templateId = templateId,
     template = template,
@@ -95,7 +96,7 @@ fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null) = Invi
     timeline = timeline?.map { it.toDTO() },
     countDown = countDown,
     connectWithUs = connectWithUs?.toDTO(),
-    dressCode = dressCode?.toDTO(),
+    dressCode = dressCode?.toDTO(dressCodePalette),
     albumLink = albumLink,
     eventVenue = eventVenue?.toDTO(),
     ourStory = ourStory?.toDTO(),
@@ -117,7 +118,7 @@ fun ConnectWithUsDTO.toEntity() = ConnectWithUs(name, phone, email)
 fun ConnectWithUs.toDTO() = ConnectWithUsDTO(name, phone, email)
 
 fun DressCodeDTO.toEntity() = DressCode(description, colorPaletteId)
-fun DressCode.toDTO() = DressCodeDTO(description, colorPaletteId)
+fun DressCode.toDTO(palette: DressCodePalette? = null) = DressCodeDTO(description, colorPaletteId, palette)
 
 fun EventVenueDTO.toEntity() = EventVenue(name, locationLink)
 fun EventVenue.toDTO() = EventVenueDTO(name, locationLink)
