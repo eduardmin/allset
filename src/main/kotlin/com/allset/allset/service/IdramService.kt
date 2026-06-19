@@ -57,7 +57,8 @@ class IdramService(
             userId = userId,
             invitationId = invitationId,
             amount = amount,
-            billNo = billNo
+            billNo = billNo,
+            status = PaymentStatus.FAILED
         )
         paymentRepository.save(payment)
 
@@ -81,8 +82,8 @@ class IdramService(
             return false
         }
 
-        if (payment.status != PaymentStatus.PENDING) {
-            logger.warn("Pre-check failed: payment status is ${payment.status} for billNo=$billNo")
+        if (payment.status == PaymentStatus.SUCCESS) {
+            logger.warn("Pre-check failed: payment already completed for billNo=$billNo")
             return false
         }
 
@@ -112,25 +113,25 @@ class IdramService(
     ): Boolean {
         logger.info("Idram payment confirmation: billNo=$billNo, transId=$transId")
 
-        val expectedChecksum = computeChecksum(recAccount, amount, billNo, payerAccount, transId, transDate)
-        if (!expectedChecksum.equals(checksum, ignoreCase = true)) {
-            logger.warn("Checksum mismatch for billNo=$billNo")
-            return false
-        }
-
         val payment = paymentRepository.findByBillNo(billNo)
         if (payment == null) {
             logger.warn("Payment not found for billNo=$billNo")
             return false
         }
 
-        if (payment.status == PaymentStatus.COMPLETED) {
+        val expectedChecksum = computeChecksum(recAccount, amount, billNo, payerAccount, transId, transDate)
+        if (!expectedChecksum.equals(checksum, ignoreCase = true)) {
+            logger.warn("Checksum mismatch for billNo=$billNo")
+            return false
+        }
+
+        if (payment.status == PaymentStatus.SUCCESS) {
             logger.info("Payment already completed for billNo=$billNo")
             return true
         }
 
         val updated = payment.copy(
-            status = PaymentStatus.COMPLETED,
+            status = PaymentStatus.SUCCESS,
             transactionId = transId,
             payerAccount = payerAccount,
             transactionDate = transDate,
@@ -176,8 +177,8 @@ class IdramService(
 
     fun getLastPaymentSummary(): PaymentSummary {
         val userId = authenticationService.getCurrentUserId()
-        val payment = paymentRepository.findFirstByUserIdAndStatusOrderByCompletedAtDesc(userId, PaymentStatus.COMPLETED)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No completed payment found")
+        val payment = paymentRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No payment found")
 
         val invitation = payment.invitationId?.let {
             invitationRepository.findById(it).orElse(null)

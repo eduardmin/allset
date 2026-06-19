@@ -5,6 +5,9 @@ import com.allset.allset.dto.*
 import com.allset.allset.model.*
 import com.allset.allset.repository.ConfirmationRepository
 import org.springframework.context.MessageSource
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -12,7 +15,8 @@ import java.util.*
 class ConfirmationService(
     private val confirmationRepository: ConfirmationRepository,
     private val messageSource: MessageSource,
-    private val localizationProperties: LocalizationProperties
+    private val localizationProperties: LocalizationProperties,
+    private val mongoTemplate: MongoTemplate
 ) {
 
     fun getConfirmationFilters(): ConfirmationFiltersResponse {
@@ -43,11 +47,12 @@ class ConfirmationService(
             ConfirmationFilter.SHOW_ALL_GUESTS -> 
                 confirmationRepository.findAllByInvitationIdAndDeletedFalse(invitationId)
             
-            ConfirmationFilter.SHOW_ONLY_ADDED_BY_ME -> 
-                confirmationRepository.findAllByInvitationIdAndDeletedFalseAndCreatedBy(
-                    invitationId, 
-                    ConfirmationCreator.INVITATION_OWNER
-                )
+            ConfirmationFilter.SHOW_ONLY_ADDED_BY_ME -> {
+                val criteria = Criteria.where("invitationId").`is`(invitationId)
+                    .and("deleted").`is`(false)
+                    .and("createdBy").ne(ConfirmationCreator.GUEST.name)
+                mongoTemplate.find(Query(criteria), Confirmation::class.java)
+            }
             
             ConfirmationFilter.SHOW_DELETED_HIDDEN -> 
                 confirmationRepository.findAllByInvitationIdAndDeletedTrue(invitationId)

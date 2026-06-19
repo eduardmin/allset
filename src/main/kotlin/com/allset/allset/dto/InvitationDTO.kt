@@ -1,6 +1,7 @@
 package com.allset.allset.dto
 
 import com.allset.allset.model.*
+import com.allset.allset.util.LocationUtils
 import java.time.Instant
 
 data class InvitationDTO(
@@ -35,7 +36,8 @@ data class TimelineEventDTO(
     val time: String,
     val venueName: Map<String, String>,
     val venueLocation: String? = null,
-    val venueKey: String? = null
+    val venueKey: String? = null,
+    val venueLocationName: String? = null
 )
 
 data class ConnectWithUsDTO(
@@ -52,7 +54,8 @@ data class DressCodeDTO(
 
 data class EventVenueDTO(
     val name: String,
-    val locationLink: String? = null
+    val locationLink: String? = null,
+    val locationName: String? = null
 )
 
 data class OurStoryDTO(
@@ -112,7 +115,7 @@ fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null, dressC
 )
 
 fun TimelineEventDTO.toEntity() = TimelineEvent(time, venueName, venueLocation, venueKey)
-fun TimelineEvent.toDTO() = TimelineEventDTO(time, venueName, venueLocation, venueKey)
+fun TimelineEvent.toDTO() = TimelineEventDTO(time, venueName, venueLocation, venueKey, LocationUtils.extractPlaceName(venueLocation))
 
 fun ConnectWithUsDTO.toEntity() = ConnectWithUs(name, phone, email)
 fun ConnectWithUs.toDTO() = ConnectWithUsDTO(name, phone, email)
@@ -121,7 +124,7 @@ fun DressCodeDTO.toEntity() = DressCode(description, colorPaletteId)
 fun DressCode.toDTO(palette: DressCodePalette? = null) = DressCodeDTO(description, colorPaletteId, palette)
 
 fun EventVenueDTO.toEntity() = EventVenue(name, locationLink)
-fun EventVenue.toDTO() = EventVenueDTO(name, locationLink)
+fun EventVenue.toDTO() = EventVenueDTO(name, locationLink, LocationUtils.extractPlaceName(locationLink))
 
 fun OurStoryDTO.toEntity() = OurStory(text, photoUrls)
 fun OurStory.toDTO() = OurStoryDTO(text, photoUrls)

@@ -14,7 +14,7 @@ data class Confirmation(
     val guestSide: GuestSide?,
     val tableNumber: Int? = null,
     val notes: String? = null,
-    val createdBy: ConfirmationCreator,
+    val createdBy: ConfirmationCreator = ConfirmationCreator.INVITATION_OWNER,
     val deleted: Boolean = false,
     val createdAt: Instant = Instant.now()
 )

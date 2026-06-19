@@ -24,6 +24,6 @@ data class Payment(
 
 enum class PaymentStatus {
     PENDING,
-    COMPLETED,
+    SUCCESS,
     FAILED
 }

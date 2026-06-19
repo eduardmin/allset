@@ -42,11 +42,11 @@ class ColorPaletteService(
         ),
         buildPalette(
             id = "bordeaux",
-            colors = listOf("#240F0F", "#3E1A1A", "#7A3838", "#D9D9D9")
+            colors = listOf("#240F0F", "#3E1A1A", "#7A3838", "#F6F5F4")
         ),
         buildPalette(
             id = "midnight_navy",
-            colors = listOf("#0F1624", "#1A273E", "#2E4A70", "#D9D9D9")
+            colors = listOf("#0F1624", "#1A273E", "#2E4A70", "#F6F5F4")
         ),
         buildPalette(
             id = "forest_night",
@@ -54,15 +54,15 @@ class ColorPaletteService(
         ),
         buildPalette(
             id = "blossom_pink",
-            colors = listOf("#A85A72", "#C47A90", "#E8A8BB", "#F5DDE5")
+            colors = listOf("#A85A72", "#4A3038", "#734A56", "#F6F5F4")
         ),
         buildPalette(
             id = "aqua_dream",
-            colors = listOf("#4A8A9A", "#6AACBA", "#9FD0DC", "#D0EEF5")
+            colors = listOf("#4A8A9A", "#2A4A52", "#9FD0DC", "#F6F5F4")
         ),
         buildPalette(
             id = "honey_dew",
-            colors = listOf("#5A9A6A", "#7AB88A", "#A8D8B0", "#D8F0E0")
+            colors = listOf("#5A9A6A", "#2A4A30", "#A8D8B0", "#D8F0E0")
         ),
         buildPalette(
             id = "sage_garden",

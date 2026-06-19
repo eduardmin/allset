@@ -19,7 +19,8 @@ data class Template(
     val lovedByKeyword: Map<String, String>,
     val createdByKeyword: Map<String, String>,
     val paletteKeyword: ColorPalette,
-    val defaults: TemplateDefaults
+    val defaults: TemplateDefaults,
+    val hasConfirmationNote: Boolean = false
 )
 
 data class TemplateDefaults(
