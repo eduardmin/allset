@@ -1,10 +1,15 @@
 package com.allset.allset.controller
 
+import com.allset.allset.config.ArcaProperties
 import com.allset.allset.model.Payment
+import com.allset.allset.service.ArcaService
 import com.allset.allset.service.IdramService
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.net.URI
 
 data class InitiatePaymentRequest(
     val invitationId: String,
@@ -14,7 +19,9 @@ data class InitiatePaymentRequest(
 @RestController
 @RequestMapping("/payments")
 class PaymentController(
-    private val idramService: IdramService
+    private val idramService: IdramService,
+    private val arcaService: ArcaService,
+    private val arcaProperties: ArcaProperties
 ) {
     private val logger = LoggerFactory.getLogger(PaymentController::class.java)
 
@@ -53,6 +60,21 @@ class PaymentController(
         } else {
             ResponseEntity.badRequest().body("FAILED")
         }
+    }
+
+    @PostMapping("/arca/initiate")
+    fun initiateArcaPayment(@RequestBody request: InitiatePaymentRequest): ArcaService.PaymentInitResponse {
+        return arcaService.initiatePayment(request.invitationId, request.language)
+    }
+
+    @GetMapping("/arca/result")
+    fun arcaResult(@RequestParam("orderId") orderId: String): ResponseEntity<Void> {
+        logger.info("ArCa return: orderId=$orderId")
+        val success = arcaService.finalizeByOrderId(orderId)
+        val redirectUrl = if (success) arcaProperties.successUrl else arcaProperties.failUrl
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header(HttpHeaders.LOCATION, URI.create(redirectUrl).toString())
+            .build()
     }
 
     @GetMapping("/last-summary")

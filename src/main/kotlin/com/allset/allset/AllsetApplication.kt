@@ -1,5 +1,6 @@
 package com.allset.allset
 
+import com.allset.allset.config.ArcaProperties
 import com.allset.allset.config.IdramProperties
 import com.allset.allset.config.LocalizationProperties
 import com.allset.allset.config.PricingProperties
@@ -11,7 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 
 @SpringBootApplication(exclude = [DataSourceAutoConfiguration::class, HibernateJpaAutoConfiguration::class])
-@EnableConfigurationProperties(LocalizationProperties::class, PricingProperties::class, PromoCodeProperties::class, IdramProperties::class)
+@EnableConfigurationProperties(LocalizationProperties::class, PricingProperties::class, PromoCodeProperties::class, IdramProperties::class, ArcaProperties::class)
 class AllsetApplication
 
 fun main(args: Array<String>) {

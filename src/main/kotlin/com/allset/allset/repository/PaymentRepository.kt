@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 interface PaymentRepository : MongoRepository<Payment, String> {
     fun findByBillNo(billNo: String): Payment?
+    fun findByProviderOrderId(providerOrderId: String): Payment?
     fun findAllByUserId(userId: String): List<Payment>
     fun findFirstByUserIdAndStatusOrderByCompletedAtDesc(userId: String, status: PaymentStatus): Payment?
     fun findFirstByUserIdOrderByCreatedAtDesc(userId: String): Payment?

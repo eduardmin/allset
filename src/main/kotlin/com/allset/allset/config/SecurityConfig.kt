@@ -70,6 +70,7 @@ class SecurityConfig(
                     "/confirmations/invitation/**",
                     "/invitations/url/**",
                     "/payments/idram/result",
+                    "/payments/arca/result",
                     "/vendors",
                     "/vendors/**",
                     "/auth/login",

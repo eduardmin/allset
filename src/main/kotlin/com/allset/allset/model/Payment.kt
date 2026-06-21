@@ -15,6 +15,8 @@ data class Payment(
     @Indexed(unique = true)
     val billNo: String,
     val status: PaymentStatus = PaymentStatus.PENDING,
+    val provider: PaymentProvider = PaymentProvider.IDRAM,
+    val providerOrderId: String? = null,
     val transactionId: String? = null,
     val payerAccount: String? = null,
     val transactionDate: String? = null,
@@ -26,4 +28,9 @@ enum class PaymentStatus {
     PENDING,
     SUCCESS,
     FAILED
+}
+
+enum class PaymentProvider {
+    IDRAM,
+    ARCA
 }
