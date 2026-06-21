@@ -285,6 +285,57 @@ class AdminController(
         return adminService.updateVendorRating(id, rating)
     }
 
+    @PatchMapping("/vendors/{id}/status")
+    fun updateVendorStatus(
+        @PathVariable id: String,
+        @RequestBody body: UpdateVendorStatusRequest
+    ): Vendor = adminService.updateVendorStatus(id, body.status, body.active)
+
     @DeleteMapping("/vendors/{id}")
     fun deleteVendor(@PathVariable id: String) = adminService.deleteVendor(id)
+
+    // ── Vendor Subcategories ──
+
+    @GetMapping("/vendor-subcategories")
+    fun getAllVendorSubcategories(@RequestParam(required = false) categoryId: String?): List<VendorSubcategory> =
+        adminService.getAllVendorSubcategories(categoryId)
+
+    @GetMapping("/vendor-subcategories/{id}")
+    fun getVendorSubcategoryById(@PathVariable id: String): VendorSubcategory =
+        adminService.getVendorSubcategoryById(id)
+
+    @PostMapping("/vendor-subcategories")
+    fun createVendorSubcategory(@RequestBody subcategory: VendorSubcategory): VendorSubcategory =
+        adminService.createVendorSubcategory(subcategory)
+
+    @PutMapping("/vendor-subcategories/{id}")
+    fun updateVendorSubcategory(@PathVariable id: String, @RequestBody subcategory: VendorSubcategory): VendorSubcategory =
+        adminService.updateVendorSubcategory(id, subcategory)
+
+    @DeleteMapping("/vendor-subcategories/{id}")
+    fun deleteVendorSubcategory(@PathVariable id: String) = adminService.deleteVendorSubcategory(id)
+
+    // ── Vendor Types ──
+
+    @GetMapping("/vendor-types")
+    fun getAllVendorTypes(@RequestParam(required = false) subcategoryId: String?): List<VendorType> =
+        adminService.getAllVendorTypes(subcategoryId)
+
+    @GetMapping("/vendor-types/{id}")
+    fun getVendorTypeById(@PathVariable id: String): VendorType = adminService.getVendorTypeById(id)
+
+    @PostMapping("/vendor-types")
+    fun createVendorType(@RequestBody type: VendorType): VendorType = adminService.createVendorType(type)
+
+    @PutMapping("/vendor-types/{id}")
+    fun updateVendorType(@PathVariable id: String, @RequestBody type: VendorType): VendorType =
+        adminService.updateVendorType(id, type)
+
+    @DeleteMapping("/vendor-types/{id}")
+    fun deleteVendorType(@PathVariable id: String) = adminService.deleteVendorType(id)
 }
+
+data class UpdateVendorStatusRequest(
+    val status: VendorStatus? = null,
+    val active: Boolean? = null
+)

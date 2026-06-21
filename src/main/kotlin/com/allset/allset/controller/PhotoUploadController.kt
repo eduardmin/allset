@@ -24,4 +24,14 @@ class PhotoUploadController(
         val fileUrl = s3Service.uploadFile(file, "uploads")
         return ResponseEntity.ok(fileUrl)
     }
+
+    @PostMapping("/upload/vendor", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun uploadVendorPhoto(@RequestParam("file") file: MultipartFile): ResponseEntity<String> {
+        if (file.isEmpty) {
+            return ResponseEntity.badRequest().body("File is empty")
+        }
+
+        val fileUrl = s3Service.uploadFile(file, "vendors")
+        return ResponseEntity.ok(fileUrl)
+    }
 }

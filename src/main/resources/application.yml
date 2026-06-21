@@ -1,7 +1,15 @@
 server:
-  port: ${SERVER_PORT:8080}
+  # EB Docker often sets PORT; local/Dockerfile can use SERVER_PORT (see Dockerfile EXPOSE).
+  port: ${SERVER_PORT:${PORT:8080}}
+  error:
+    # Surface validation/business messages (e.g. publish checks) in JSON error responses
+    include-message: always
+    include-binding-errors: always
 
 spring:
+  docker:
+    compose:
+      enabled: false
   servlet:
     multipart:
       enabled: true
@@ -48,6 +56,15 @@ idram:
   secret-key: ${IDRAM_SECRET_KEY:}
   success-url: ${IDRAM_SUCCESS_URL:https://allset.am/payment/success}
   fail-url: ${IDRAM_FAIL_URL:https://allset.am/payment/fail}
+
+arca:
+  user-name: ${ARCA_USERNAME:login}
+  password: ${ARCA_PASSWORD:password}
+  base-url: ${ARCA_BASE_URL:https://ipaytest.arca.am:8445/payment/rest}
+  return-url: ${ARCA_RETURN_URL:https://api.allset.am/payments/arca/result}
+  currency: ${ARCA_CURRENCY:051}
+  success-url: ${ARCA_SUCCESS_URL:https://allset.am/payment/success}
+  fail-url: ${ARCA_FAIL_URL:https://allset.am/payment/fail}
 
 aws:
   s3:

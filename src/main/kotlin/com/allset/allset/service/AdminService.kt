@@ -27,7 +27,9 @@ class AdminService(
     private val faqRepository: FaqRepository,
     private val feedbackRepository: FeedbackRepository,
     private val vendorRepository: VendorRepository,
-    private val vendorCategoryRepository: VendorCategoryRepository
+    private val vendorCategoryRepository: VendorCategoryRepository,
+    private val vendorSubcategoryRepository: VendorSubcategoryRepository,
+    private val vendorTypeRepository: VendorTypeRepository
 ) {
 
     // ── Dashboard ──
@@ -397,10 +399,104 @@ class AdminService(
         return vendorRepository.save(vendor.copy(rating = rating))
     }
 
+    fun updateVendorStatus(id: String, status: VendorStatus?, active: Boolean?): Vendor {
+        val vendor = vendorRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor not found.")
+        }
+        return vendorRepository.save(
+            vendor.copy(
+                status = status ?: vendor.status,
+                active = active ?: vendor.active
+            )
+        )
+    }
+
     fun deleteVendor(id: String) {
         val vendor = vendorRepository.findById(id).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor not found.")
         }
         vendorRepository.delete(vendor)
+    }
+
+    // ── Vendor Subcategories ──
+
+    fun getAllVendorSubcategories(categoryId: String?): List<VendorSubcategory> {
+        return if (categoryId != null) {
+            vendorSubcategoryRepository.findAllByCategoryId(categoryId)
+        } else {
+            vendorSubcategoryRepository.findAll()
+        }
+    }
+
+    fun getVendorSubcategoryById(id: String): VendorSubcategory {
+        return vendorSubcategoryRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor subcategory not found.")
+        }
+    }
+
+    fun createVendorSubcategory(subcategory: VendorSubcategory): VendorSubcategory {
+        vendorCategoryRepository.findById(subcategory.categoryId).orElseThrow {
+            ResponseStatusException(HttpStatus.BAD_REQUEST, "Parent category not found.")
+        }
+        val existing = vendorSubcategoryRepository.findBySlug(subcategory.slug)
+        if (existing != null) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Subcategory slug '${subcategory.slug}' already exists.")
+        }
+        return vendorSubcategoryRepository.save(subcategory.copy(id = null))
+    }
+
+    fun updateVendorSubcategory(id: String, subcategory: VendorSubcategory): VendorSubcategory {
+        vendorSubcategoryRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor subcategory not found.")
+        }
+        return vendorSubcategoryRepository.save(subcategory.copy(id = id))
+    }
+
+    fun deleteVendorSubcategory(id: String) {
+        val subcategory = vendorSubcategoryRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor subcategory not found.")
+        }
+        vendorSubcategoryRepository.delete(subcategory)
+    }
+
+    // ── Vendor Types ──
+
+    fun getAllVendorTypes(subcategoryId: String?): List<VendorType> {
+        return if (subcategoryId != null) {
+            vendorTypeRepository.findAllBySubcategoryId(subcategoryId)
+        } else {
+            vendorTypeRepository.findAll()
+        }
+    }
+
+    fun getVendorTypeById(id: String): VendorType {
+        return vendorTypeRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor type not found.")
+        }
+    }
+
+    fun createVendorType(type: VendorType): VendorType {
+        vendorSubcategoryRepository.findById(type.subcategoryId).orElseThrow {
+            ResponseStatusException(HttpStatus.BAD_REQUEST, "Parent subcategory not found.")
+        }
+        val existing = vendorTypeRepository.findBySlug(type.slug)
+        if (existing != null) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Type slug '${type.slug}' already exists.")
+        }
+        return vendorTypeRepository.save(type.copy(id = null))
+    }
+
+    fun updateVendorType(id: String, type: VendorType): VendorType {
+        vendorTypeRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor type not found.")
+        }
+        return vendorTypeRepository.save(type.copy(id = id))
+    }
+
+    fun deleteVendorType(id: String) {
+        val type = vendorTypeRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor type not found.")
+        }
+        vendorTypeRepository.delete(type)
     }
 }
