@@ -24,6 +24,8 @@ data class Invitation(
     val albumLink: String? = null,
     val eventVenue: EventVenue? = null,
     val ourStory: OurStory? = null,
+    val wishlist: Wishlist? = null,
+    val additionalInformation: List<Map<String, String>>? = null,
     val languages: List<String> = listOf("en"),
     val colorPaletteId: String? = null,
     val status: InvitationStatus = InvitationStatus.DRAFT,
@@ -60,6 +62,11 @@ data class EventVenue(
 data class OurStory(
     val text: Map<String, String>,
     val photoUrls: List<String>
+)
+
+data class Wishlist(
+    val description: Map<String, String>? = null,
+    val link: String? = null
 )
 
 enum class InvitationStatus {

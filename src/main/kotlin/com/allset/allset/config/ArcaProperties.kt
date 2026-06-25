@@ -9,6 +9,6 @@ data class ArcaProperties(
     val baseUrl: String = "https://ipaytest.arca.am:8445/payment/rest",
     val returnUrl: String = "",
     val currency: String = "051",
-    val successUrl: String = "",
-    val failUrl: String = ""
+    // Frontend host used to build the post-payment redirect to the /{lang}/build/confirm page
+    val confirmBaseUrl: String = "https://development.d1uukuuqwvhgzl.amplifyapp.com"
 )

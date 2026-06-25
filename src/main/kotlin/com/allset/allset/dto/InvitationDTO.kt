@@ -21,6 +21,8 @@ data class InvitationDTO(
     val albumLink: String? = null,
     val eventVenue: EventVenueDTO? = null,
     val ourStory: OurStoryDTO? = null,
+    val wishlist: WishlistDTO? = null,
+    val additionalInformation: List<Map<String, String>>? = null,
     val languages: List<String> = listOf("en"),
     val colorPaletteId: String? = null,
     val status: InvitationStatus = InvitationStatus.DRAFT,
@@ -63,6 +65,11 @@ data class OurStoryDTO(
     val photoUrls: List<String>
 )
 
+data class WishlistDTO(
+    val description: Map<String, String>? = null,
+    val link: String? = null
+)
+
 fun InvitationDTO.toEntity(ownerId: String) = Invitation(
     id = id,
     templateId = templateId,
@@ -80,6 +87,8 @@ fun InvitationDTO.toEntity(ownerId: String) = Invitation(
     albumLink = albumLink,
     eventVenue = eventVenue?.toEntity(),
     ourStory = ourStory?.toEntity(),
+    wishlist = wishlist?.toEntity(),
+    additionalInformation = additionalInformation,
     languages = languages,
     colorPaletteId = colorPaletteId,
     pricing = pricing,
@@ -103,6 +112,8 @@ fun Invitation.toDTO(guestCount: Int? = null, template: Template? = null, dressC
     albumLink = albumLink,
     eventVenue = eventVenue?.toDTO(),
     ourStory = ourStory?.toDTO(),
+    wishlist = wishlist?.toDTO(),
+    additionalInformation = additionalInformation,
     languages = languages,
     colorPaletteId = colorPaletteId,
     status = status,
@@ -128,3 +139,6 @@ fun EventVenue.toDTO() = EventVenueDTO(name, locationLink, LocationUtils.extract
 
 fun OurStoryDTO.toEntity() = OurStory(text, photoUrls)
 fun OurStory.toDTO() = OurStoryDTO(text, photoUrls)
+
+fun WishlistDTO.toEntity() = Wishlist(description, link)
+fun Wishlist.toDTO() = WishlistDTO(description, link)

@@ -20,7 +20,9 @@ data class Template(
     val createdByKeyword: Map<String, String>,
     val paletteKeyword: ColorPalette,
     val defaults: TemplateDefaults,
-    val hasConfirmationNote: Boolean = false
+    val hasConfirmationNote: Boolean = false,
+    val hasWishlist: Boolean = false,
+    val hasAdditionalInformation: Boolean = false
 )
 
 data class TemplateDefaults(

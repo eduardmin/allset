@@ -58,13 +58,12 @@ idram:
   fail-url: ${IDRAM_FAIL_URL:https://allset.am/payment/fail}
 
 arca:
-  user-name: ${ARCA_USERNAME:login}
-  password: ${ARCA_PASSWORD:password}
-  base-url: ${ARCA_BASE_URL:https://ipaytest.arca.am:8445/payment/rest}
+  user-name: ${ARCA_USERNAME:allset_api}
+  password: ${ARCA_PASSWORD:Allset148997}
+  base-url: ${ARCA_BASE_URL:https://testepg.arca.am/payment/rest}
   return-url: ${ARCA_RETURN_URL:https://api.allset.am/payments/arca/result}
   currency: ${ARCA_CURRENCY:051}
-  success-url: ${ARCA_SUCCESS_URL:https://allset.am/payment/success}
-  fail-url: ${ARCA_FAIL_URL:https://allset.am/payment/fail}
+  confirm-base-url: ${ARCA_CONFIRM_BASE_URL:https://development.d1uukuuqwvhgzl.amplifyapp.com}
 
 aws:
   s3:

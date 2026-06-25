@@ -17,6 +17,7 @@ data class Payment(
     val status: PaymentStatus = PaymentStatus.PENDING,
     val provider: PaymentProvider = PaymentProvider.IDRAM,
     val providerOrderId: String? = null,
+    val language: String? = null,
     val transactionId: String? = null,
     val payerAccount: String? = null,
     val transactionDate: String? = null,

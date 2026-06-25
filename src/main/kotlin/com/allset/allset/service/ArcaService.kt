@@ -4,6 +4,7 @@ import com.allset.allset.config.ArcaProperties
 import com.allset.allset.model.Payment
 import com.allset.allset.model.PaymentProvider
 import com.allset.allset.model.PaymentStatus
+import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.PaymentRepository
 import com.allset.allset.repository.UserRepository
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
@@ -18,6 +19,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.UUID
 
@@ -30,11 +33,15 @@ class ArcaService(
     private val referralService: ReferralService,
     private val templateService: TemplateService,
     private val pricingService: PricingService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val invitationRepository: InvitationRepository
 ) {
     private val logger = LoggerFactory.getLogger(ArcaService::class.java)
     private val webClient = WebClient.builder().build()
     private val objectMapper: ObjectMapper = jacksonObjectMapper()
+
+    private val baseUrl: String
+        get() = arcaProperties.baseUrl.trimEnd('/')
 
     data class PaymentInitResponse(
         val formUrl: String,
@@ -89,7 +96,7 @@ class ArcaService(
         }
 
         val rawResponse = webClient.post()
-            .uri("${arcaProperties.baseUrl}/register.do")
+            .uri("$baseUrl/register.do")
             .body(BodyInserters.fromFormData(form))
             .retrieve()
             .bodyToMono<String>()
@@ -112,7 +119,8 @@ class ArcaService(
             billNo = orderNumber,
             status = PaymentStatus.FAILED,
             provider = PaymentProvider.ARCA,
-            providerOrderId = response.orderId
+            providerOrderId = response.orderId,
+            language = language.lowercase()
         )
         paymentRepository.save(payment)
 
@@ -146,7 +154,7 @@ class ArcaService(
         }
 
         val rawStatus = webClient.post()
-            .uri("${arcaProperties.baseUrl}/getOrderStatusExtended.do")
+            .uri("$baseUrl/getOrderStatusExtended.do")
             .body(BodyInserters.fromFormData(form))
             .retrieve()
             .bodyToMono<String>()
@@ -184,5 +192,36 @@ class ArcaService(
         }
 
         return true
+    }
+
+    /**
+     * Builds the frontend redirect URL the customer is sent to after returning from the
+     * ArCa gateway, e.g.
+     * https://host/{lang}/build/confirm?template=...&palette=...&id=...&payment=visa&legal=true&status=success
+     * All dynamic params are derived from the invitation tied to the payment.
+     */
+    fun buildRedirectUrl(orderId: String, success: Boolean): String {
+        val status = if (success) "success" else "failed"
+        val base = arcaProperties.confirmBaseUrl.trimEnd('/')
+
+        val payment = paymentRepository.findByProviderOrderId(orderId)
+        val invitation = payment?.invitationId?.let { invitationRepository.findById(it).orElse(null) }
+
+        val lang = (payment?.language?.takeIf { it.isNotBlank() }
+            ?: invitation?.languages?.firstOrNull()
+            ?: "en").lowercase()
+
+        val params = buildList {
+            invitation?.templateId?.let { add("template" to it) }
+            invitation?.colorPaletteId?.let { add("palette" to it) }
+            invitation?.id?.let { add("id" to it) }
+            add("payment" to "visa")
+            add("legal" to "true")
+            add("status" to status)
+        }.joinToString("&") { (key, value) ->
+            "$key=${URLEncoder.encode(value, StandardCharsets.UTF_8)}"
+        }
+
+        return "$base/$lang/build/confirm?$params"
     }
 }
