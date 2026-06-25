@@ -50,6 +50,13 @@ class InvitationController(
         invitationService.deleteAllDrafts()
     }
 
+    // Delete all draft and active invitations of the current user
+    @DeleteMapping("/mine")
+    fun deleteAllMyInvitations(): Map<String, Int> {
+        val deleted = invitationService.deleteAllUserInvitations()
+        return mapOf("deleted" to deleted)
+    }
+
     // Get all drafts
     @GetMapping("/drafts")
     fun getDrafts(): List<InvitationDTO> {

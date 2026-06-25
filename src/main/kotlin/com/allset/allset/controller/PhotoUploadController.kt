@@ -34,4 +34,19 @@ class PhotoUploadController(
         val fileUrl = s3Service.uploadFile(file, "vendors")
         return ResponseEntity.ok(fileUrl)
     }
+
+    @PostMapping("/upload/feedback", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun uploadFeedbackPhoto(@RequestParam("file") file: MultipartFile): ResponseEntity<String> {
+        if (file.isEmpty) {
+            return ResponseEntity.badRequest().body("File is empty")
+        }
+
+        val contentType = file.contentType
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return ResponseEntity.badRequest().body("Only image files are allowed")
+        }
+
+        val fileUrl = s3Service.uploadFile(file, "feedbacks")
+        return ResponseEntity.ok(fileUrl)
+    }
 }

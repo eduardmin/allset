@@ -63,7 +63,18 @@ class ArcaService(
         val actionCodeDescription: String? = null,
         val errorCode: String? = null,
         val errorMessage: String? = null,
-        val amount: Long? = null
+        val amount: Long? = null,
+        val currency: String? = null,
+        val orderNumber: String? = null,
+        val paymentAmountInfo: PaymentAmountInfo? = null
+    )
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class PaymentAmountInfo(
+        // e.g. CREATED, APPROVED (two-stage hold), DEPOSITED (captured), DECLINED, REFUNDED
+        val paymentState: String? = null,
+        val approvedAmount: Long? = null,
+        val depositedAmount: Long? = null
     )
 
     fun initiatePayment(invitationId: String, language: String): PaymentInitResponse {
@@ -134,13 +145,18 @@ class ArcaService(
      * Returns true if the order was successfully paid (orderStatus == 2).
      */
     fun finalizeByOrderId(orderId: String): Boolean {
-        logger.info("ArCa finalize: orderId=$orderId")
+        logger.info("ArCa finalize: orderId=$orderId, gateway=$baseUrl, userNameSet=${arcaProperties.userName.isNotBlank()}")
 
         val payment = paymentRepository.findByProviderOrderId(orderId)
         if (payment == null) {
             logger.warn("ArCa finalize: payment not found for orderId=$orderId")
             return false
         }
+
+        logger.info(
+            "ArCa finalize: payment found orderId=$orderId, billNo=${payment.billNo}, " +
+                "currentStatus=${payment.status}, invitationId=${payment.invitationId}, amount=${payment.amount}"
+        )
 
         if (payment.status == PaymentStatus.SUCCESS) {
             logger.info("ArCa finalize: payment already completed for orderId=$orderId")
@@ -153,17 +169,48 @@ class ArcaService(
             add("orderId", orderId)
         }
 
-        val rawStatus = webClient.post()
-            .uri("$baseUrl/getOrderStatusExtended.do")
-            .body(BodyInserters.fromFormData(form))
-            .retrieve()
-            .bodyToMono<String>()
-            .block()
+        val rawStatus = try {
+            webClient.post()
+                .uri("$baseUrl/getOrderStatusExtended.do")
+                .body(BodyInserters.fromFormData(form))
+                .retrieve()
+                .bodyToMono<String>()
+                .block()
+        } catch (e: Exception) {
+            logger.error("ArCa finalize: getOrderStatusExtended call failed for orderId=$orderId", e)
+            null
+        }
 
-        val status = rawStatus?.let { objectMapper.readValue(it, OrderStatusResponse::class.java) }
+        if (rawStatus == null) {
+            logger.warn("ArCa finalize: empty status response for orderId=$orderId")
+            return false
+        }
+
+        val status = try {
+            objectMapper.readValue(rawStatus, OrderStatusResponse::class.java)
+        } catch (e: Exception) {
+            logger.error("ArCa finalize: failed to parse status response for orderId=$orderId", e)
+            null
+        }
+
+        // Full diagnostic of the gateway decision. orderStatus reference:
+        // 0=registered (unpaid) 1=pre-authorized/hold 2=deposited(paid) 3=reversed 4=refunded 6=declined
+        logger.info(
+            "ArCa status for orderId=$orderId: orderStatus=${status?.orderStatus}, " +
+                "paymentState=${status?.paymentAmountInfo?.paymentState}, " +
+                "actionCode=${status?.actionCode}, actionDesc=${status?.actionCodeDescription}, " +
+                "errorCode=${status?.errorCode}, errorMessage=${status?.errorMessage}, " +
+                "orderNumber=${status?.orderNumber}, amount=${status?.amount}, currency=${status?.currency}, " +
+                "approvedAmount=${status?.paymentAmountInfo?.approvedAmount}, depositedAmount=${status?.paymentAmountInfo?.depositedAmount}"
+        )
 
         if (status?.orderStatus != 2) {
-            logger.warn("ArCa finalize: order not paid for orderId=$orderId, orderStatus=${status?.orderStatus}, actionCode=${status?.actionCode}, desc=${status?.actionCodeDescription}")
+            logger.warn(
+                "ArCa finalize: order NOT captured (orderStatus=${status?.orderStatus}, " +
+                    "paymentState=${status?.paymentAmountInfo?.paymentState}) for orderId=$orderId. " +
+                    "If orderStatus=1/paymentState=APPROVED, the merchant is configured for two-stage payments " +
+                    "and a deposit/capture step is required."
+            )
             return false
         }
 
@@ -207,6 +254,12 @@ class ArcaService(
         val payment = paymentRepository.findByProviderOrderId(orderId)
         val invitation = payment?.invitationId?.let { invitationRepository.findById(it).orElse(null) }
 
+        if (payment == null) {
+            logger.warn("ArCa redirect: no payment for orderId=$orderId; redirect will omit invitation params")
+        } else if (invitation == null) {
+            logger.warn("ArCa redirect: payment found but invitation missing for orderId=$orderId, invitationId=${payment.invitationId}")
+        }
+
         val lang = (payment?.language?.takeIf { it.isNotBlank() }
             ?: invitation?.languages?.firstOrNull()
             ?: "en").lowercase()
@@ -222,6 +275,8 @@ class ArcaService(
             "$key=${URLEncoder.encode(value, StandardCharsets.UTF_8)}"
         }
 
-        return "$base/$lang/build/confirm?$params"
+        val redirectUrl = "$base/$lang/build/confirm?$params"
+        logger.info("ArCa redirect: orderId=$orderId, success=$success -> $redirectUrl")
+        return redirectUrl
     }
 }

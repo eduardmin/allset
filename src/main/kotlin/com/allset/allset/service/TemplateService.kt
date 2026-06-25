@@ -38,11 +38,17 @@ class TemplateService(
 
     @PostConstruct
     fun seedDefaultPricing() {
-        defaultPrices.forEach { (templateId, price) ->
-            if (templatePricingRepository.findByTemplateId(templateId) == null) {
-                templatePricingRepository.save(TemplatePricing(templateId = templateId, basePrice = price))
-                logger.info("Seeded default pricing for $templateId: $price")
+        // Never let a transient MongoDB issue at startup crash the application context
+        // (which would fail the deployment and roll back). Log and continue instead.
+        runCatching {
+            defaultPrices.forEach { (templateId, price) ->
+                if (templatePricingRepository.findByTemplateId(templateId) == null) {
+                    templatePricingRepository.save(TemplatePricing(templateId = templateId, basePrice = price))
+                    logger.info("Seeded default pricing for $templateId: $price")
+                }
             }
+        }.onFailure { ex ->
+            logger.error("Failed to seed default template pricing at startup; continuing without it", ex)
         }
     }
 

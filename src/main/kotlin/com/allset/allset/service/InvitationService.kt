@@ -4,6 +4,7 @@ import com.allset.allset.dto.PartialInvitationDTO
 import com.allset.allset.dto.mergeWithPartialUpdate
 import com.allset.allset.model.Invitation
 import com.allset.allset.model.InvitationStatus
+import com.allset.allset.model.TemplateType
 import com.allset.allset.repository.ConfirmationRepository
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.UserRepository
@@ -54,6 +55,7 @@ class InvitationService(
         val invitationToSave = invitationWithDefaults.copy(
             id = null,
             ownerId = userId,
+            title = formatTitleForTemplate(invitationWithDefaults.title, invitationWithDefaults.templateId),
             urlExtension = generateUniqueUrl(invitation.title),
             status = InvitationStatus.DRAFT,
             pricing = pricingSummary,
@@ -85,6 +87,7 @@ class InvitationService(
         val updatedUrl = if (patch.title != null) generateUniqueUrl(patch.title) else existingDraft.urlExtension
 
         return invitationRepository.save(merged.copy(
+            title = formatTitleForTemplate(merged.title, merged.templateId),
             urlExtension = updatedUrl,
             lastModifiedAt = Instant.now()
         ))
@@ -118,6 +121,17 @@ class InvitationService(
         val userId = authenticationService.getCurrentUserId()
         val drafts = invitationRepository.findAllByOwnerIdAndStatus(userId, InvitationStatus.DRAFT)
         invitationRepository.deleteAll(drafts)
+    }
+
+    // Delete all draft and active invitations owned by the current user.
+    fun deleteAllUserInvitations(): Int {
+        val userId = authenticationService.getCurrentUserId()
+        val toDelete = invitationRepository.findAllByOwnerId(userId)
+            .filter { it.status == InvitationStatus.DRAFT || it.status == InvitationStatus.ACTIVE }
+        if (toDelete.isNotEmpty()) {
+            invitationRepository.deleteAll(toDelete)
+        }
+        return toDelete.size
     }
 
     // Get active invitations (published)
@@ -285,6 +299,7 @@ class InvitationService(
         val invitationToSave = invitationWithDefaults.copy(
             id = null,
             ownerId = userId,
+            title = formatTitleForTemplate(invitationWithDefaults.title, invitationWithDefaults.templateId),
             urlExtension = generateUniqueUrl(invitation.title),
             status = InvitationStatus.ACTIVE,
             publishedAt = publishedAt,
@@ -292,6 +307,18 @@ class InvitationService(
             pricing = pricingSummary
         )
         return invitationRepository.save(invitationToSave)
+    }
+
+    // Formats a comma-separated couple title (e.g. "Eduard, Lia") into the template-specific
+    // joined form: Rustic Love Story uses "Eduard + Lia"; all other templates use "Eduard & Lia".
+    // Idempotent: a title that no longer contains a comma is returned trimmed and unchanged.
+    private fun formatTitleForTemplate(title: Map<String, String>, templateId: String): Map<String, String> {
+        val type = templateService.getTemplateById(templateId)?.type
+        val separator = if (type == TemplateType.Rustic_Love_Story) " + " else " & "
+        return title.mapValues { (_, value) ->
+            val parts = value.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            if (parts.size >= 2) parts.joinToString(separator) else value.trim()
+        }
     }
 
     private fun applyDefaults(invitation: Invitation): Invitation {
@@ -360,6 +387,7 @@ class InvitationService(
             invitationRepository.save(invitationWithDefaults.copy(
                 id = id,
                 ownerId = userId,
+                title = formatTitleForTemplate(invitationWithDefaults.title, invitationWithDefaults.templateId),
                 pricing = pricingSummary,
                 lastModifiedAt = Instant.now()
             ))
@@ -378,7 +406,9 @@ class InvitationService(
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized to modify this invitation")
         }
 
-        val merged = existing.mergeWithPartialUpdate(patch).copy(
+        val mergedBase = existing.mergeWithPartialUpdate(patch)
+        val merged = mergedBase.copy(
+            title = formatTitleForTemplate(mergedBase.title, mergedBase.templateId),
             lastModifiedAt = Instant.now()
         )
         return invitationRepository.save(merged)
