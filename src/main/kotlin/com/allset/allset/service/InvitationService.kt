@@ -313,7 +313,7 @@ class InvitationService(
     // joined form: Rustic Love Story uses "Eduard + Lia"; all other templates use "Eduard & Lia".
     // Idempotent: a title that no longer contains a comma is returned trimmed and unchanged.
     private fun formatTitleForTemplate(title: Map<String, String>, templateId: String): Map<String, String> {
-        val type = templateService.getTemplateById(templateId)?.type
+        val type = templateService.getTemplateType(templateId)
         val separator = if (type == TemplateType.Rustic_Love_Story) " + " else " & "
         return title.mapValues { (_, value) ->
             val parts = value.split(",").map { it.trim() }.filter { it.isNotEmpty() }

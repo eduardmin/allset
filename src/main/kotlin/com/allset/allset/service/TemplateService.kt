@@ -60,6 +60,15 @@ class TemplateService(
         return getTemplates().find { it.id == id }
     }
 
+    // Lightweight templateId -> type lookup that avoids rebuilding the full template list
+    // (pricing, S3 URLs, palettes, etc.). Kept in sync with the ids declared in getTemplates().
+    fun getTemplateType(templateId: String): TemplateType? = when (templateId) {
+        "template.rustic.love.story" -> TemplateType.Rustic_Love_Story
+        "template.modern.romance" -> TemplateType.Modern_Romance
+        "template.classic.elegance" -> TemplateType.Classic_Elegance
+        else -> null
+    }
+
     fun getBasePriceForTemplate(templateId: String): BigDecimal {
         return templatePricingRepository.findByTemplateId(templateId)?.basePrice
             ?: pricingProperties.basePrice
