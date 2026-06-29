@@ -293,18 +293,19 @@ class InvitationService(
         val templateBasePrice = templateService.getBasePriceForTemplate(invitation.templateId)
         val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
 
-        val publishedAt = Instant.now()
-        val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)
-
+        // Created invitations start as DRAFT. They only become ACTIVE after a successful
+        // payment (publishDraftAfterPayment) or via the explicit publish endpoint.
         val invitationToSave = invitationWithDefaults.copy(
             id = null,
             ownerId = userId,
             title = formatTitleForTemplate(invitationWithDefaults.title, invitationWithDefaults.templateId),
             urlExtension = generateUniqueUrl(invitation.title),
-            status = InvitationStatus.ACTIVE,
-            publishedAt = publishedAt,
-            expiresAt = expiresAt,
-            pricing = pricingSummary
+            status = InvitationStatus.DRAFT,
+            publishedAt = null,
+            expiresAt = null,
+            pricing = pricingSummary,
+            createdAt = Instant.now(),
+            lastModifiedAt = Instant.now()
         )
         return invitationRepository.save(invitationToSave)
     }

@@ -83,8 +83,8 @@ class TemplateService(
                 type = TemplateType.Rustic_Love_Story,
                 imageUrl = s3Service.getTemplateUrl("rustic_love_story.png"),
                 mobileImageUrl = s3Service.getTemplateUrl("rustic_love_story_mobile.png"),
-                mainImageMaxCount = 4,
-                albumImageMaxCount = 4,
+                mainImageMaxCount = 5,
+                albumImageMaxCount = 3,
                 paletteIds = listOf("warm_linen", "dusty_lilac", "muted_sage", "copper_dusk"),
                 appliedPromoCodes = appliedPromoCodes
             ),
@@ -93,8 +93,8 @@ class TemplateService(
                 type = TemplateType.Modern_Romance,
                 imageUrl = s3Service.getTemplateUrl("modern_romance.png"),
                 mobileImageUrl = s3Service.getTemplateUrl("modern_romance_mobile.png"),
-                mainImageMaxCount = 5,
-                albumImageMaxCount = 5,
+                mainImageMaxCount = 6,
+                albumImageMaxCount = 2,
                 paletteIds = listOf(
                     "sage_garden", "rosewood", "coastal_mist",
                     "terracotta_sun", "midnight_bloom", "velvet_plum"
@@ -106,8 +106,8 @@ class TemplateService(
                 type = TemplateType.Classic_Elegance,
                 imageUrl = s3Service.getTemplateUrl("classic_elegance.png"),
                 mobileImageUrl = s3Service.getTemplateUrl("classic_elegance_mobile.png"),
-                mainImageMaxCount = 5,
-                albumImageMaxCount = 5,
+                mainImageMaxCount = 1,
+                albumImageMaxCount = 4,
                 paletteIds = listOf(
                     "charcoal_noir", "bordeaux", "midnight_navy", "forest_night",
                     "blossom_pink", "aqua_dream", "honey_dew"

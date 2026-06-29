@@ -333,6 +333,31 @@ class AdminController(
 
     @DeleteMapping("/vendor-types/{id}")
     fun deleteVendorType(@PathVariable id: String) = adminService.deleteVendorType(id)
+
+    // ── API Error Logs ──
+
+    @GetMapping("/error-logs")
+    fun getErrorLogs(
+        @RequestParam(required = false) status: Int?,
+        @RequestParam(required = false) userId: String?,
+        @RequestParam(required = false)
+        @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME)
+        from: java.time.Instant?,
+        @RequestParam(required = false)
+        @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME)
+        to: java.time.Instant?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "50") size: Int
+    ): ApiErrorLogPageResponse = adminService.getErrorLogs(status, userId, from, to, page, size)
+
+    @GetMapping("/error-logs/{id}")
+    fun getErrorLogById(@PathVariable id: String): ApiErrorLog = adminService.getErrorLogById(id)
+
+    @DeleteMapping("/error-logs/{id}")
+    fun deleteErrorLog(@PathVariable id: String) = adminService.deleteErrorLog(id)
+
+    @DeleteMapping("/error-logs")
+    fun clearErrorLogs() = adminService.clearErrorLogs()
 }
 
 data class UpdateVendorStatusRequest(

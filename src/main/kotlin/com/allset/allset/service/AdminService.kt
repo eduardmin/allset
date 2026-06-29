@@ -6,9 +6,15 @@ import com.allset.allset.model.*
 import com.allset.allset.repository.*
 import com.allset.allset.service.InvitationDefaultsService
 import org.springframework.context.MessageSource
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import java.time.Instant
 import java.util.*
 
 @Service
@@ -29,7 +35,9 @@ class AdminService(
     private val vendorRepository: VendorRepository,
     private val vendorCategoryRepository: VendorCategoryRepository,
     private val vendorSubcategoryRepository: VendorSubcategoryRepository,
-    private val vendorTypeRepository: VendorTypeRepository
+    private val vendorTypeRepository: VendorTypeRepository,
+    private val apiErrorLogRepository: ApiErrorLogRepository,
+    private val mongoTemplate: MongoTemplate
 ) {
 
     // ── Dashboard ──
@@ -498,5 +506,65 @@ class AdminService(
             ResponseStatusException(HttpStatus.NOT_FOUND, "Vendor type not found.")
         }
         vendorTypeRepository.delete(type)
+    }
+
+    // ── API Error Logs ──
+
+    fun getErrorLogs(
+        status: Int?,
+        userId: String?,
+        from: Instant?,
+        to: Instant?,
+        page: Int,
+        size: Int
+    ): ApiErrorLogPageResponse {
+        val safePage = if (page < 0) 0 else page
+        val safeSize = size.coerceIn(1, 200)
+
+        val criteria = mutableListOf<Criteria>()
+        if (status != null) criteria.add(Criteria.where("status").`is`(status))
+        if (!userId.isNullOrBlank()) criteria.add(Criteria.where("userId").`is`(userId))
+        if (from != null && to != null) {
+            criteria.add(Criteria.where("timestamp").gte(from).lte(to))
+        } else if (from != null) {
+            criteria.add(Criteria.where("timestamp").gte(from))
+        } else if (to != null) {
+            criteria.add(Criteria.where("timestamp").lte(to))
+        }
+
+        val query = Query()
+        if (criteria.isNotEmpty()) {
+            query.addCriteria(Criteria().andOperator(*criteria.toTypedArray()))
+        }
+
+        val total = mongoTemplate.count(Query.of(query), ApiErrorLog::class.java)
+
+        query.with(Sort.by(Sort.Direction.DESC, "timestamp"))
+        query.with(PageRequest.of(safePage, safeSize))
+        val items = mongoTemplate.find(query, ApiErrorLog::class.java)
+
+        return ApiErrorLogPageResponse(
+            items = items,
+            total = total,
+            page = safePage,
+            size = safeSize
+        )
+    }
+
+    fun getErrorLogById(id: String): ApiErrorLog {
+        return apiErrorLogRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Error log not found.")
+        }
+    }
+
+    fun deleteErrorLog(id: String) {
+        val errorLog = apiErrorLogRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Error log not found.")
+        }
+        apiErrorLogRepository.delete(errorLog)
+    }
+
+    fun clearErrorLogs() {
+        apiErrorLogRepository.deleteAll()
     }
 }

@@ -34,7 +34,8 @@ class ArcaService(
     private val templateService: TemplateService,
     private val pricingService: PricingService,
     private val userRepository: UserRepository,
-    private val invitationRepository: InvitationRepository
+    private val invitationRepository: InvitationRepository,
+    private val earningsService: EarningsService
 ) {
     private val logger = LoggerFactory.getLogger(ArcaService::class.java)
     private val webClient = WebClient.builder().build()
@@ -237,6 +238,8 @@ class ArcaService(
         } catch (e: Exception) {
             logger.error("Failed to process referral reward for userId=${updated.userId}", e)
         }
+
+        earningsService.recordEarningForPayment(updated)
 
         return true
     }

@@ -26,7 +26,8 @@ class IdramService(
     private val templateService: TemplateService,
     private val pricingService: PricingService,
     private val userRepository: com.allset.allset.repository.UserRepository,
-    private val invitationRepository: InvitationRepository
+    private val invitationRepository: InvitationRepository,
+    private val earningsService: EarningsService
 ) {
     private val logger = LoggerFactory.getLogger(IdramService::class.java)
 
@@ -155,6 +156,8 @@ class IdramService(
         } catch (e: Exception) {
             logger.error("Failed to process referral reward for userId=${updated.userId}", e)
         }
+
+        earningsService.recordEarningForPayment(updated)
 
         return true
     }
