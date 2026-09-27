@@ -6,6 +6,8 @@ data class PartialInvitationDTO(
     val id: String? = null,
     val templateId: String? = null,
     val title: Map<String, String>? = null,
+    val groomName: Map<String, String>? = null,
+    val brideName: Map<String, String>? = null,
     val eventDate: String? = null,
     val description: Map<String, String>? = null,
     val mainImages: List<String>? = null,
@@ -27,6 +29,8 @@ fun PartialInvitationDTO.toNewEntity(ownerId: String) = Invitation(
     templateId = templateId ?: "",
     ownerId = ownerId,
     title = title ?: emptyMap(),
+    groomName = groomName,
+    brideName = brideName,
     urlExtension = "",
     eventDate = eventDate,
     description = description,
@@ -45,24 +49,41 @@ fun PartialInvitationDTO.toNewEntity(ownerId: String) = Invitation(
     colorPaletteId = colorPaletteId
 )
 
-fun Invitation.mergeWithPartialUpdate(update: PartialInvitationDTO): Invitation {
+/**
+ * Merges a partial update into an existing invitation.
+ *
+ * [presentFields] holds the names of the top-level keys that were actually present
+ * in the incoming JSON body. This lets us distinguish an explicit `null` (clear the
+ * field) from an omitted field (keep the current value) for optional/nullable fields,
+ * which is impossible from the deserialized DTO alone (both arrive as `null`).
+ *
+ * Required, non-null fields (title, templateId, confirmationEnabled, countDown,
+ * languages) are never cleared: a `null`/absent value keeps the current one.
+ */
+fun Invitation.mergeWithPartialUpdate(
+    update: PartialInvitationDTO,
+    presentFields: Set<String>
+): Invitation {
+    fun present(field: String) = field in presentFields
     return this.copy(
         templateId = update.templateId ?: this.templateId,
         title = update.title ?: this.title,
-        eventDate = update.eventDate ?: this.eventDate,
-        description = update.description ?: this.description,
-        mainImages = update.mainImages ?: this.mainImages,
+        groomName = if (present("groomName")) update.groomName else this.groomName,
+        brideName = if (present("brideName")) update.brideName else this.brideName,
+        eventDate = if (present("eventDate")) update.eventDate else this.eventDate,
+        description = if (present("description")) update.description else this.description,
+        mainImages = if (present("mainImages")) update.mainImages else this.mainImages,
         confirmationEnabled = update.confirmationEnabled ?: this.confirmationEnabled,
-        timeline = update.timeline?.map { it.toEntity() } ?: this.timeline,
+        timeline = if (present("timeline")) update.timeline?.map { it.toEntity() } else this.timeline,
         countDown = update.countDown ?: this.countDown,
-        connectWithUs = update.connectWithUs?.toEntity() ?: this.connectWithUs,
-        dressCode = update.dressCode?.toEntity() ?: this.dressCode,
-        albumLink = update.albumLink ?: this.albumLink,
-        eventVenue = update.eventVenue?.toEntity() ?: this.eventVenue,
-        ourStory = update.ourStory?.toEntity() ?: this.ourStory,
-        wishlist = update.wishlist?.toEntity() ?: this.wishlist,
-        additionalInformation = update.additionalInformation ?: this.additionalInformation,
+        connectWithUs = if (present("connectWithUs")) update.connectWithUs?.toEntity() else this.connectWithUs,
+        dressCode = if (present("dressCode")) update.dressCode?.toEntity() else this.dressCode,
+        albumLink = if (present("albumLink")) update.albumLink else this.albumLink,
+        eventVenue = if (present("eventVenue")) update.eventVenue?.toEntity() else this.eventVenue,
+        ourStory = if (present("ourStory")) update.ourStory?.toEntity() else this.ourStory,
+        wishlist = if (present("wishlist")) update.wishlist?.toEntity() else this.wishlist,
+        additionalInformation = if (present("additionalInformation")) update.additionalInformation else this.additionalInformation,
         languages = update.languages ?: this.languages,
-        colorPaletteId = update.colorPaletteId ?: this.colorPaletteId
+        colorPaletteId = if (present("colorPaletteId")) update.colorPaletteId else this.colorPaletteId
     )
 }

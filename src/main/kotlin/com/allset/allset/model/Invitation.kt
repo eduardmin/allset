@@ -12,6 +12,10 @@ data class Invitation(
     val templateId: String,
     val ownerId: String,
     val title: Map<String, String>,
+    // Localized couple names. Nullable so pre-existing documents keep loading;
+    // enforced as required at publish time (see validateForPublishing).
+    val groomName: Map<String, String>? = null,
+    val brideName: Map<String, String>? = null,
     @Indexed(unique = true) val urlExtension: String,
     val eventDate: String? = null,
     val description: Map<String, String>? = null,

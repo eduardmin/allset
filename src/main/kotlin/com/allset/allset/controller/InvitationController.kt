@@ -8,6 +8,8 @@ import com.allset.allset.service.ConfirmationService
 import com.allset.allset.service.InvitationService
 import com.allset.allset.service.TemplateService
 import com.allset.allset.service.UserService
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
@@ -20,7 +22,8 @@ class InvitationController(
     private val userService: UserService,
     private val confirmationService: ConfirmationService,
     private val templateService: TemplateService,
-    private val dressCodePaletteRepository: DressCodePaletteRepository
+    private val dressCodePaletteRepository: DressCodePaletteRepository,
+    private val objectMapper: ObjectMapper
 ) {
 
     private fun Invitation.toDTOWithPalette(guestCount: Int? = null, template: com.allset.allset.model.Template? = null): InvitationDTO {
@@ -28,11 +31,21 @@ class InvitationController(
         return toDTO(guestCount = guestCount, template = template, dressCodePalette = palette)
     }
 
+    private fun parsePartial(body: JsonNode): PartialInvitationDTO =
+        objectMapper.treeToValue(body, PartialInvitationDTO::class.java)
+
+    // Top-level keys actually present in the JSON body. Used to distinguish an
+    // explicit `null` (clear the field) from an omitted field (keep current value)
+    // during partial updates.
+    private fun presentFields(body: JsonNode): Set<String> =
+        if (body.isObject) body.fieldNames().asSequence().toSet() else emptySet()
+
     @PostMapping("/draft")
-    fun saveDraft(@RequestBody dto: PartialInvitationDTO): InvitationDTO {
+    fun saveDraft(@RequestBody body: JsonNode): InvitationDTO {
         val userId = authenticationService.getCurrentUserId()
+        val dto = parsePartial(body)
         return if (dto.id != null) {
-            invitationService.patchDraft(dto.id, dto).toDTOWithPalette()
+            invitationService.patchDraft(dto.id, dto, presentFields(body)).toDTOWithPalette()
         } else {
             val invitation = dto.toNewEntity(userId)
             invitationService.saveDraft(invitation).toDTOWithPalette()
@@ -85,10 +98,11 @@ class InvitationController(
     }
 
     @PostMapping
-    fun saveInvitation(@RequestBody dto: PartialInvitationDTO): InvitationDTO {
+    fun saveInvitation(@RequestBody body: JsonNode): InvitationDTO {
         val userId = authenticationService.getCurrentUserId()
+        val dto = parsePartial(body)
         return if (dto.id != null) {
-            invitationService.patchInvitation(dto.id, dto).toDTOWithPalette()
+            invitationService.patchInvitation(dto.id, dto, presentFields(body)).toDTOWithPalette()
         } else {
             val invitation = dto.toNewEntity(userId)
             invitationService.createInvitation(invitation).toDTOWithPalette()

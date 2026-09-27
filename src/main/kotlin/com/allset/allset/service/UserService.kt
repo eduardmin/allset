@@ -15,7 +15,8 @@ class UserService(
     private val userRepository: UserRepository,
     private val invitationRepository: InvitationRepository,
     private val confirmationRepository: ConfirmationRepository,
-    private val authenticationService: AuthenticationService
+    private val authenticationService: AuthenticationService,
+    private val promoCodeCleanupService: PromoCodeCleanupService
 ) {
 
     private val logger = LoggerFactory.getLogger(UserService::class.java)
@@ -51,14 +52,16 @@ class UserService(
 
     fun getCurrentUser(): User {
         val userId = authenticationService.getCurrentUserId()
-        return userRepository.findById(userId).orElseThrow {
+        val user = userRepository.findById(userId).orElseThrow {
             RuntimeException("🚨 User not found.")
         }
+        return promoCodeCleanupService.pruneInvalidPromoCodes(user)
     }
 
     fun getCurrentUserOrNull(): User? {
         val userId = authenticationService.getCurrentUserIdOrNull() ?: return null
-        return userRepository.findById(userId).orElse(null)
+        val user = userRepository.findById(userId).orElse(null) ?: return null
+        return promoCodeCleanupService.pruneInvalidPromoCodes(user)
     }
 
     fun getInvitationsOfCurrentUser(): List<Invitation> {

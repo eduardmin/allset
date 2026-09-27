@@ -65,6 +65,40 @@ class AdminService(
         }
     }
 
+    // Activity buckets with full user info (name, email, etc.), not just counts.
+    // Registration time is derived from each user's ObjectId (see User.registeredAt);
+    // "logged in" uses lastSeenAt, refreshed when an authenticated user loads home.
+    fun getUserActivityStats(): AdminUserActivityStats {
+        val now = Instant.now()
+        val last7Days = now.minus(7, java.time.temporal.ChronoUnit.DAYS)
+        val last30Days = now.minus(30, java.time.temporal.ChronoUnit.DAYS)
+
+        val allUsers = userRepository.findAll()
+
+        val registeredLast30 = allUsers
+            .filter { (it.registeredAt() ?: Instant.EPOCH).isAfter(last30Days) }
+            .sortedByDescending { it.registeredAt() }
+        val registeredLast7 = registeredLast30
+            .filter { (it.registeredAt() ?: Instant.EPOCH).isAfter(last7Days) }
+        val loggedInLast7 = allUsers
+            .filter { (it.lastSeenAt ?: Instant.EPOCH).isAfter(last7Days) }
+            .sortedByDescending { it.lastSeenAt }
+
+        // Compute invitation counts once for every user that appears in any bucket.
+        val invitationCounts = (registeredLast30 + loggedInLast7)
+            .mapNotNull { it.id }
+            .distinct()
+            .associateWith { userId -> invitationRepository.findAllByOwnerId(userId).size }
+
+        fun User.toResponse() = this.toAdminResponse(invitationCounts[this.id] ?: 0)
+
+        return AdminUserActivityStats(
+            registeredLast7Days = registeredLast7.map { it.toResponse() },
+            registeredLast30Days = registeredLast30.map { it.toResponse() },
+            loggedInLast7Days = loggedInLast7.map { it.toResponse() }
+        )
+    }
+
     fun getUserById(id: String): AdminUserResponse {
         val user = userRepository.findById(id).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "User not found.")

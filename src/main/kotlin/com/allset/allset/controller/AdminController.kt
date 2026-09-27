@@ -18,6 +18,11 @@ class AdminController(
         return adminService.getDashboardStats()
     }
 
+    @GetMapping("/dashboard/user-activity")
+    fun getUserActivityStats(): AdminUserActivityStats {
+        return adminService.getUserActivityStats()
+    }
+
     // ── Users ──
 
     @GetMapping("/users")

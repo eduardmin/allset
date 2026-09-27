@@ -41,3 +41,11 @@ out/
 
 ### macOS ###
 .DS_Store
+
+### Secrets ###
+.env
+.env.*
+
+# Build artifacts (deployed to EB directly, too large for GitHub 100MB limit)
+app.jar
+deploy.zip

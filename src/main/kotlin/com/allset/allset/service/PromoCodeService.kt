@@ -37,9 +37,10 @@ class PromoCodeService(
     }
 
     fun getActivePromoCodes(): List<AppliedPromoCode> {
+        // getCurrentUser() already prunes expired / deleted / admin-deactivated codes
+        // (and persists the change), so the remaining codes are all still usable.
         val user = userService.getCurrentUser()
-        val now = Instant.now()
-        return user.appliedPromoCodes.filter { it.expiresAt == null || it.expiresAt.isAfter(now) }
+        return user.appliedPromoCodes
     }
 
     fun previewPromoCode(code: String): PricingSummary {
@@ -56,6 +57,31 @@ class PromoCodeService(
         val updatedUser = user.copy(appliedPromoCodes = emptyList())
         userRepository.save(updatedUser)
         return pricingService.basePricing()
+    }
+
+    /**
+     * Consumes a promo code that was applied to a just-paid invitation so it can't be
+     * reused. Only affects SINGLE_USE codes (e.g. referral rewards): removes the code
+     * from the user's profile and marks the underlying promo code used/inactive.
+     * Multi-use codes (GLOBAL/BUSINESS) are left untouched so they remain reusable and
+     * are never globally deactivated.
+     */
+    fun consumeAppliedPromoOnPayment(userId: String, appliedCode: String?) {
+        if (appliedCode.isNullOrBlank()) return
+
+        val promoCode = promoCodeRepository.findByCodeIgnoreCase(appliedCode) ?: return
+        if (promoCode.type != PromoCodeType.SINGLE_USE) return
+
+        val user = userRepository.findById(userId).orElse(null) ?: return
+        val remaining = user.appliedPromoCodes.filterNot { it.code.equals(appliedCode, ignoreCase = true) }
+        if (remaining.size != user.appliedPromoCodes.size) {
+            userRepository.save(user.copy(appliedPromoCodes = remaining))
+        }
+
+        // Record usage + deactivate only if not already consumed, to avoid double counting.
+        if (promoCode.active) {
+            recordUsage(promoCode, userId)
+        }
     }
 
     private fun recordUsage(promoCode: PromoCode, userId: String) {

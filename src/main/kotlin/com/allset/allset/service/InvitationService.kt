@@ -23,7 +23,9 @@ class InvitationService(
     private val templateService: TemplateService,
     private val invitationDefaultsService: InvitationDefaultsService,
     private val pricingService: PricingService,
-    private val confirmationRepository: ConfirmationRepository
+    private val confirmationRepository: ConfirmationRepository,
+    private val promoCodeCleanupService: PromoCodeCleanupService,
+    private val promoCodeService: PromoCodeService
 ) {
 
     fun generateUniqueUrl(title: Map<String, String>): String {
@@ -50,7 +52,7 @@ class InvitationService(
         val invitationWithDefaults = applyDefaults(invitation)
 
         val templateBasePrice = templateService.getBasePriceForTemplate(invitation.templateId)
-        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
+        val pricingSummary = pricingService.summarize(promoCodeCleanupService.pruneInvalidPromoCodes(user).appliedPromoCodes, templateBasePrice)
 
         val invitationToSave = invitationWithDefaults.copy(
             id = null,
@@ -67,7 +69,7 @@ class InvitationService(
     }
 
     // Partial update draft (for auto-save)
-    fun patchDraft(id: String, patch: PartialInvitationDTO): Invitation {
+    fun patchDraft(id: String, patch: PartialInvitationDTO, presentFields: Set<String>): Invitation {
         val userId = authenticationService.getCurrentUserId()
         
         val existingDraft = invitationRepository.findById(id).orElseThrow {
@@ -82,7 +84,7 @@ class InvitationService(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only update drafts, not published invitations")
         }
 
-        val merged = existingDraft.mergeWithPartialUpdate(patch)
+        val merged = existingDraft.mergeWithPartialUpdate(patch, presentFields)
 
         val updatedUrl = if (patch.title != null) generateUniqueUrl(patch.title) else existingDraft.urlExtension
 
@@ -183,7 +185,7 @@ class InvitationService(
         }
 
         val templateBasePrice = templateService.getBasePriceForTemplate(draftReady.templateId)
-        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
+        val pricingSummary = pricingService.summarize(promoCodeCleanupService.pruneInvalidPromoCodes(user).appliedPromoCodes, templateBasePrice)
 
         val publishedAt = Instant.now()
         val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)
@@ -225,7 +227,7 @@ class InvitationService(
         }
 
         val templateBasePrice = templateService.getBasePriceForTemplate(draftReady.templateId)
-        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
+        val pricingSummary = pricingService.summarize(promoCodeCleanupService.pruneInvalidPromoCodes(user).appliedPromoCodes, templateBasePrice)
 
         val publishedAt = Instant.now()
         val expiresAt = publishedAt.plus(365, ChronoUnit.DAYS)
@@ -238,7 +240,14 @@ class InvitationService(
             lastModifiedAt = Instant.now()
         )
 
-        return invitationRepository.save(publishedInvitation)
+        val saved = invitationRepository.save(publishedInvitation)
+
+        // One-time consumption: a single-use promo (e.g. referral reward) applied to this
+        // paid invitation is removed from the user's profile and marked used, so it cannot
+        // be reused on another purchase. Multi-use codes are left untouched.
+        promoCodeService.consumeAppliedPromoOnPayment(userId, pricingSummary.promoCode?.code)
+
+        return saved
     }
 
     fun validateForPayment(invitationId: String): Invitation {
@@ -263,6 +272,12 @@ class InvitationService(
     private fun validateForPublishing(invitation: Invitation) {
         if (invitation.title.values.all { it.isBlank() }) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Title is required to publish")
+        }
+        if (invitation.groomName == null || invitation.groomName.values.all { it.isBlank() }) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Groom name is required to publish")
+        }
+        if (invitation.brideName == null || invitation.brideName.values.all { it.isBlank() }) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Bride name is required to publish")
         }
         if (invitation.urlExtension.isBlank()) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "URL extension is required to publish")
@@ -291,7 +306,7 @@ class InvitationService(
         val invitationWithDefaults = applyDefaults(invitation)
 
         val templateBasePrice = templateService.getBasePriceForTemplate(invitation.templateId)
-        val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
+        val pricingSummary = pricingService.summarize(promoCodeCleanupService.pruneInvalidPromoCodes(user).appliedPromoCodes, templateBasePrice)
 
         // Created invitations start as DRAFT. They only become ACTIVE after a successful
         // payment (publishDraftAfterPayment) or via the explicit publish endpoint.
@@ -383,7 +398,7 @@ class InvitationService(
             }
             val invitationWithDefaults = applyDefaults(updatedInvitation)
             val templateBasePrice = templateService.getBasePriceForTemplate(updatedInvitation.templateId)
-            val pricingSummary = pricingService.summarize(user.appliedPromoCodes, templateBasePrice)
+            val pricingSummary = pricingService.summarize(promoCodeCleanupService.pruneInvalidPromoCodes(user).appliedPromoCodes, templateBasePrice)
 
             invitationRepository.save(invitationWithDefaults.copy(
                 id = id,
@@ -397,7 +412,7 @@ class InvitationService(
         }
     }
 
-    fun patchInvitation(id: String, patch: PartialInvitationDTO): Invitation {
+    fun patchInvitation(id: String, patch: PartialInvitationDTO, presentFields: Set<String>): Invitation {
         val userId = authenticationService.getCurrentUserId()
         val existing = invitationRepository.findById(id).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $id not found")
@@ -407,7 +422,7 @@ class InvitationService(
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized to modify this invitation")
         }
 
-        val mergedBase = existing.mergeWithPartialUpdate(patch)
+        val mergedBase = existing.mergeWithPartialUpdate(patch, presentFields)
         val merged = mergedBase.copy(
             title = formatTitleForTemplate(mergedBase.title, mergedBase.templateId),
             lastModifiedAt = Instant.now()
