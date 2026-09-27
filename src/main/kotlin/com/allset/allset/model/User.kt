@@ -11,6 +11,10 @@ data class User(
     @Id
     val id: String? = null,
     val sub: String? = null,
+    // Stored normalized (trimmed + lowercased); uniqueness enforced by a unique
+    // index (see UserIndexInitializer). Annotation documents intent and applies
+    // if Mongo auto-index-creation is ever enabled.
+    @Indexed(unique = true)
     val email: String,
     val name: String,
     val picture: String?,

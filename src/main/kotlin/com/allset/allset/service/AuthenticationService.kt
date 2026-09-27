@@ -2,7 +2,9 @@ package com.allset.allset.service
 
 import com.allset.allset.model.User
 import com.allset.allset.repository.UserRepository
+import com.allset.allset.util.EmailUtils
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
@@ -49,11 +51,19 @@ class AuthenticationService(
             return null
         }
 
-        var user = userRepository.findByEmail(email)
-        if (user != null) {
-            user = userRepository.save(user.copy(sub = sub))
+        val normalizedEmail = EmailUtils.normalize(email)
+
+        val existing = userRepository.findByEmailIgnoreCase(normalizedEmail)
+        val user = if (existing != null) {
+            userRepository.save(existing.copy(sub = sub))
         } else {
-            user = userRepository.save(User(sub = sub, email = email, name = name ?: "User", picture = picture))
+            try {
+                userRepository.save(User(sub = sub, email = normalizedEmail, name = name ?: "User", picture = picture))
+            } catch (ex: DuplicateKeyException) {
+                // A concurrent request created this user first; reuse and attach this sub.
+                val raced = userRepository.findByEmailIgnoreCase(normalizedEmail) ?: throw ex
+                userRepository.save(raced.copy(sub = sub))
+            }
         }
 
         return user.id

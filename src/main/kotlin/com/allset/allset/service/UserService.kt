@@ -5,7 +5,9 @@ import com.allset.allset.model.*
 import com.allset.allset.repository.InvitationRepository
 import com.allset.allset.repository.UserRepository
 import com.allset.allset.repository.ConfirmationRepository
+import com.allset.allset.util.EmailUtils
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -22,18 +24,20 @@ class UserService(
     private val logger = LoggerFactory.getLogger(UserService::class.java)
 
     fun saveUser(jwt: Jwt): User {
-        val email = jwt.getClaim<String>("email")
+        val rawEmail = jwt.getClaim<String>("email")
         val name = jwt.getClaim<String>("name") ?: jwt.getClaim<String>("nickname") ?: "User"
         val picture = jwt.getClaim<String>("picture")
         val sub = jwt.getClaim<String>("sub")
 
-        logger.info("🔑 Extracted User Info from Auth0: Email=$email, Name=$name, Picture=$picture, Sub=$sub")
+        logger.info("🔑 Extracted User Info from Auth0: Email=$rawEmail, Name=$name, Picture=$picture, Sub=$sub")
 
-        if (email == null) {
+        if (rawEmail == null) {
             throw RuntimeException("Email claim not found in JWT token")
         }
 
-        val existingUser = userRepository.findByEmail(email)
+        val email = EmailUtils.normalize(rawEmail)
+
+        val existingUser = userRepository.findByEmailIgnoreCase(email)
         return if (existingUser != null) {
             logger.info("✅ User already exists: ${existingUser.email}")
             if (existingUser.referralCode.isBlank()) {
@@ -42,10 +46,16 @@ class UserService(
                 existingUser
             }
         } else {
-            val newUser = User(email = email, name = name, picture = picture)
-            val savedUser = userRepository.save(newUser)
-            logger.info("✅ Created new user: ${savedUser.email}")
-            savedUser
+            try {
+                val savedUser = userRepository.save(User(email = email, name = name, picture = picture))
+                logger.info("✅ Created new user: ${savedUser.email}")
+                savedUser
+            } catch (ex: DuplicateKeyException) {
+                // A concurrent request created this user first; reuse that record.
+                logger.info("↩️ Concurrent create for $email — reusing existing user")
+                userRepository.findByEmailIgnoreCase(email)
+                    ?: throw ex
+            }
         }
     }
 
